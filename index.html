@@ -272,6 +272,9 @@
     background:#C3CCDB;display:block;
   }
   .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  a.thumb{cursor:pointer;transition:transform .15s ease}
+  a.thumb:hover{transform:scale(1.01)}
+  a.thumb:hover .play{background:#fff}
   .thumb .ghost{
     position:absolute;inset:0;
     display:flex;align-items:center;justify-content:center;
@@ -768,10 +771,13 @@ function thumb(r){
     ? '<img src="' + esc(r.thumb) + '" alt="">'
     : '<div class="grain"></div><div class="ghost" style="font-size:' + ghostSize(s.code) + '">' + esc(s.code) + '</div>';
   const bg = r.thumb ? "" : "background:linear-gradient(148deg," + shade(s.color,26) + "," + shade(s.color,-30) + ");";
-  return '<span class="thumb" style="' + bg + '">' + inner +
+  const playable = !r.campus && !isPending(r) && r.url;
+  const tag = playable ? "a" : "span";
+  const attrs = playable ? ' href="' + esc(r.url) + '" target="_blank" rel="noopener"' : "";
+  return '<' + tag + ' class="thumb"' + attrs + ' style="' + bg + '">' + inner +
     '<span class="play"><svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg></span>' +
     (r.duration ? '<span class="len">' + esc(r.duration) + '</span>' : "") +
-  '</span>';
+  '</' + tag + '>';
 }
 
 function actions(r){
