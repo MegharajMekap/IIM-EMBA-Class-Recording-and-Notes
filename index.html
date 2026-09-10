@@ -776,7 +776,11 @@ function thumb(r){
 
 function actions(r){
   if(r.campus) return '<span class="waiting">Campus session · not recorded</span>';
-  if(isPending(r)) return '<span class="waiting">Link coming soon</span>';
+  if(isPending(r)){
+    const code = sub(r.subject).code;
+    const expired = code === "BS" || code === "MM1" || code === "MM2";
+    return '<span class="waiting">' + (expired ? "Video expired" : "Link coming soon") + '</span>';
+  }
   let h = '<a class="open" href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
           '<svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>Open recording</a>';
   if(r.passcode) h += '<button class="pass" data-pass="' + esc(r.passcode) + '">Passcode ' + esc(r.passcode) + '</button>';
