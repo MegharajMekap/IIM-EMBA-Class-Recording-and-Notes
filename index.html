@@ -779,6 +779,11 @@ function thumb(r){
   '</' + tag + '>';
 }
 
+function youTubeId(url){
+  const m = String(url).match(/(?:youtu\.be\/|youtube\.com\/watch\?v=|youtube\.com\/shorts\/)([\w-]{11})/);
+  return m ? m[1] : "";
+}
+
 function actions(r){
   if(r.campus) return '<span class="waiting">Campus session · not recorded</span>';
   if(isPending(r)){
@@ -786,7 +791,9 @@ function actions(r){
     const expired = code === "BS" || code === "MM1" || code === "MM2";
     return '<span class="waiting">' + (expired ? "Video expired" : "Link coming soon") + '</span>';
   }
-  let h = '<a class="open" href="' + esc(r.url) + '" target="_blank" rel="noopener">' +
+  const ytId = youTubeId(r.url);
+  let h = '<a class="open" href="' + esc(r.url) + '" target="_blank" rel="noopener"' +
+          (ytId ? ' data-yt="' + esc(ytId) + '"' : "") + '>' +
           '<svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>Open recording</a>';
   if(r.passcode) h += '<button class="pass" data-pass="' + esc(r.passcode) + '">Passcode ' + esc(r.passcode) + '</button>';
   return h;
@@ -952,7 +959,39 @@ function buildChips(){
   }).join("");
 }
 
+function openYouTube(e, id, httpsUrl){
+  const ua = navigator.userAgent || "";
+  const isAndroid = /Android/.test(ua);
+  const isIOS = /iPhone|iPad|iPod/.test(ua) && !window.MSStream;
+  if(!isAndroid && !isIOS) return; // desktop keeps normal link behaviour
+
+  e.preventDefault();
+
+  if(isAndroid){
+    window.location.href =
+      "intent://www.youtube.com/watch?v=" + id +
+      "#Intent;package=com.google.android.youtube;scheme=https;S.browser_fallback_url=" +
+      encodeURIComponent(httpsUrl) + ";end;";
+    return;
+  }
+
+  const before = Date.now();
+  let handed = false;
+  const onHide = () => { handed = true; };
+  document.addEventListener("visibilitychange", onHide, { once:true });
+  window.location.href = "youtube://www.youtube.com/watch?v=" + id;
+  setTimeout(() => {
+    document.removeEventListener("visibilitychange", onHide);
+    if(!handed && Date.now() - before < 2500) window.open(httpsUrl, "_blank");
+  }, 1200);
+}
+
 document.addEventListener("click", e => {
+  const yt = e.target.closest("a.open[data-yt]");
+  if(yt){
+    openYouTube(e, yt.dataset.yt, yt.href);
+    return;
+  }
   const chip = e.target.closest(".chip");
   if(chip){
     active = chip.dataset.s;
