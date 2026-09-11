@@ -503,6 +503,23 @@
     .ib-text{flex:none;max-width:360px}
   }
 
+  /* ---------- PWA manual refresh buttons ---------- */
+  .pwa-refresh{
+    position:fixed;z-index:60;
+    width:44px;height:44px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--navy);color:#fff;border:none;
+    box-shadow:0 3px 10px rgba(0,0,0,.25);
+    cursor:pointer;
+  }
+  .pwa-refresh[hidden]{display:none}
+  .pwa-refresh svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .pwa-refresh:active{transform:scale(.94)}
+  .pwa-refresh-top{
+    top:calc(env(safe-area-inset-top,0px) + 10px);
+    right:calc(env(safe-area-inset-right,0px) + 10px);
+  }
+
   @media (prefers-reduced-motion:reduce){
     html{scroll-behavior:auto}
     *{transition:none!important;animation:none!important}
@@ -534,6 +551,10 @@
   <button class="ib-go" id="ubGo">Refresh</button>
   <button class="ib-close" id="ubClose" aria-label="Dismiss">&times;</button>
 </div>
+
+<button class="pwa-refresh pwa-refresh-top" id="pwaRefreshTop" hidden aria-label="Refresh page">
+  <svg viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6M4.5 9a8 8 0 0113.9-3.5L20 9M4 15l1.6 3.5A8 8 0 0019.5 15"/></svg>
+</button>
 
 <div class="noteModal" id="noteModal" hidden>
   <div class="nm-bar">
@@ -1192,6 +1213,17 @@ render();
   if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").catch(function(){});
   }
+})();
+
+/* ── manual refresh buttons (PWA/standalone only — browser tabs already have one) ── */
+(function(){
+  var isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
+  if(!isStandalone) return;
+
+  var top = document.getElementById("pwaRefreshTop");
+  top.hidden = false;
+
+  top.addEventListener("click", function(){ location.reload(); });
 })();
 
 /* ── detect a newer version when the PWA is reopened from the background ──
