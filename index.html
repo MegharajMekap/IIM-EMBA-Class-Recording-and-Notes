@@ -523,6 +523,18 @@
   <button class="ib-close" id="ibClose" aria-label="Dismiss">&times;</button>
 </div>
 
+<div class="installbar" id="updatebar" hidden>
+  <div class="ib-icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6M4.5 9a8 8 0 0113.9-3.5L20 9M4 15l1.6 3.5A8 8 0 0019.5 15"/></svg>
+  </div>
+  <div class="ib-text">
+    <strong>New version available</strong>
+    <span>Refresh to get the latest recordings and notes.</span>
+  </div>
+  <button class="ib-go" id="ubGo">Refresh</button>
+  <button class="ib-close" id="ubClose" aria-label="Dismiss">&times;</button>
+</div>
+
 <div class="noteModal" id="noteModal" hidden>
   <div class="nm-bar">
     <button class="nm-close" id="nmClose">
@@ -1180,6 +1192,45 @@ render();
   if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").catch(function(){});
   }
+})();
+
+/* ── detect a newer version when the PWA is reopened from the background ──
+   Standalone/home-screen apps don't reload on resume like a browser tab,
+   so a re-fetch-and-compare on visibility/pageshow is what actually catches
+   updates, not the (no-op) service worker above. */
+(function(){
+  var bar = document.getElementById("updatebar");
+  var go = document.getElementById("ubGo");
+  var close = document.getElementById("ubClose");
+  var baseline = null;
+  var checking = false;
+
+  function fetchFresh(){
+    return fetch(location.href, { cache: "no-store" }).then(function(res){
+      return res.text();
+    });
+  }
+
+  function check(){
+    if(checking) return;
+    checking = true;
+    fetchFresh().then(function(html){
+      if(baseline === null){
+        baseline = html;
+      } else if(html !== baseline){
+        bar.hidden = false;
+      }
+    }).catch(function(){}).finally(function(){ checking = false; });
+  }
+
+  go.addEventListener("click", function(){ location.reload(); });
+  close.addEventListener("click", function(){ bar.hidden = true; });
+
+  document.addEventListener("visibilitychange", function(){
+    if(document.visibilityState === "visible") check();
+  });
+  window.addEventListener("pageshow", check);
+  check();
 })();
 
 </script>
