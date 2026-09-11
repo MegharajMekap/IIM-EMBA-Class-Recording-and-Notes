@@ -467,38 +467,6 @@
     font-size:22px;line-height:1;cursor:pointer;padding:0 2px;
   }
   .ib-close:hover{color:#fff}
-  /* ---------- note viewer (standalone/PWA) ---------- */
-  .noteModal{
-    position:fixed;inset:0;z-index:100;
-    display:flex;flex-direction:column;
-    background:var(--card);
-  }
-  .noteModal[hidden]{display:none}
-  .nm-bar{
-    flex:none;display:flex;align-items:center;gap:10px;
-    padding:calc(env(safe-area-inset-top,0px) + 10px) 14px 10px;
-    border-bottom:1px solid var(--line);
-    background:var(--card);
-  }
-  .nm-close{
-    flex:none;display:flex;align-items:center;gap:6px;
-    background:var(--navy-tint);color:var(--navy-deep);
-    border:none;border-radius:8px;padding:8px 12px;
-    font-size:13.5px;font-weight:600;cursor:pointer;
-  }
-  .nm-close svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .nm-title{
-    flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-    font-size:13.5px;font-weight:600;color:var(--ink-soft);
-  }
-  .nm-ext{
-    flex:none;display:flex;align-items:center;justify-content:center;
-    width:32px;height:32px;border-radius:8px;
-    color:var(--mute);
-  }
-  .nm-ext:hover{background:var(--navy-tint);color:var(--navy-deep)}
-  .nm-ext svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .noteModal iframe{flex:1;width:100%;border:none;background:#fff}
 
   @media (min-width:640px){
     .installbar{justify-content:center}
@@ -557,19 +525,6 @@
 <button class="pwa-refresh pwa-refresh-top" id="pwaRefreshTop" hidden aria-label="Refresh page">
   <svg viewBox="0 0 24 24"><path d="M4 4v6h6M20 20v-6h-6M4.5 9a8 8 0 0113.9-3.5L20 9M4 15l1.6 3.5A8 8 0 0019.5 15"/></svg>
 </button>
-
-<div class="noteModal" id="noteModal" hidden>
-  <div class="nm-bar">
-    <button class="nm-close" id="nmClose">
-      <svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Back
-    </button>
-    <span class="nm-title" id="nmTitle"></span>
-    <a class="nm-ext" id="nmExt" target="_blank" rel="noopener" aria-label="Open in browser">
-      <svg viewBox="0 0 24 24"><path d="M14 3h7v7M21 3l-9 9M19 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h5"/></svg>
-    </a>
-  </div>
-  <iframe id="nmFrame" title="Note preview"></iframe>
-</div>
 
 <div class="wrap">
 
@@ -955,7 +910,7 @@ function noteRow(n){
   if(!n.url){
     return '<div class="nrow">' + body + '<span class="nsoon">Not uploaded yet</span></div>';
   }
-  return '<a class="nrow nget" href="' + esc(n.url) + '" target="_blank" rel="noopener" data-title="' + esc(n.title) + '">' +
+  return '<a class="nrow" href="' + esc(n.url) + '" target="_blank" rel="noopener">' +
     body +
     '<span class="nopen"><svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>Open</span></a>';
 }
@@ -1124,47 +1079,6 @@ document.getElementById("footNote").textContent =
 
 buildChips();
 render();
-
-/* ── note viewer (keeps PWA/standalone users inside the app, with a way back) ── */
-(function(){
-  var modal = document.getElementById("noteModal");
-  var frame = document.getElementById("nmFrame");
-  var titleEl = document.getElementById("nmTitle");
-  var extLink = document.getElementById("nmExt");
-  var closeBtn = document.getElementById("nmClose");
-
-  var isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-  if(!isStandalone) return; // regular browser tabs already give a back button
-
-  function openNote(url, title){
-    frame.src = url;
-    titleEl.textContent = title || "";
-    extLink.href = url;
-    modal.hidden = false;
-    document.body.style.overflow = "hidden";
-    history.pushState({ noteModal:true }, "");
-  }
-  function closeNote(){
-    modal.hidden = true;
-    frame.src = "about:blank";
-    document.body.style.overflow = "";
-  }
-
-  closeBtn.addEventListener("click", function(){
-    if(history.state && history.state.noteModal) history.back();
-    else closeNote();
-  });
-  window.addEventListener("popstate", function(){
-    if(!modal.hidden) closeNote();
-  });
-
-  document.addEventListener("click", function(e){
-    var a = e.target.closest("a.nget");
-    if(!a) return;
-    e.preventDefault();
-    openNote(a.href, a.dataset.title);
-  });
-})();
 
 /* ── add to home screen ── */
 (function(){
