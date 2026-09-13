@@ -112,6 +112,17 @@
     padding:5px 12px;
     margin-bottom:22px;
   }
+  .term .live{
+    color:#1E8A4C;font-weight:700;
+    animation:livePulse 1.8s ease-in-out infinite;
+  }
+  @keyframes livePulse{
+    0%,100%{opacity:1}
+    50%{opacity:.45}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .term .live{animation:none}
+  }
   h1{
     font-family:var(--serif);
     font-weight:700;
@@ -594,7 +605,7 @@
       </p>
     </div>
 
-    <div class="term" id="termLabel">Batch 2026 · Term 1 Phase 2 in progress</div>
+    <div class="term" id="termLabel">Batch 2026 · Term 1 Phase 2 <span class="live">in progress</span></div>
     <h1>EMBA Handbook</h1>
     <p class="standfirst">Your one-stop resource for the Executive MBA batch — class recordings, notes, and the upcoming schedule, all in one place. Open a session to watch the recording and use the passcode listed beside the link. Campus weeks are listed too, but those sessions were taught in person and have no recording.</p>
 
