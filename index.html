@@ -583,6 +583,49 @@
     .notice-track{animation:none}
   }
 
+  /* ---------- live class banner ---------- */
+  .livebar{
+    display:flex;align-items:center;gap:12px;
+    background:linear-gradient(90deg,#146B2E,#1E8A4C);
+    color:#fff;padding:10px 16px;
+    text-decoration:none;
+    cursor:pointer;
+  }
+  .livebar[hidden]{display:none}
+  .livebar .lb-dot{
+    width:9px;height:9px;border-radius:50%;flex:none;
+    background:#fff;
+    box-shadow:0 0 0 rgba(255,255,255,.6);
+    animation:livebarPulse 1.6s ease-in-out infinite;
+  }
+  @keyframes livebarPulse{
+    0%{box-shadow:0 0 0 0 rgba(255,255,255,.55)}
+    70%{box-shadow:0 0 0 8px rgba(255,255,255,0)}
+    100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}
+  }
+  .livebar .lb-text{
+    flex:1;min-width:0;
+    font-size:13.5px;line-height:1.35;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .livebar .lb-text strong{font-weight:700;margin-right:6px}
+  .livebar .lb-join{
+    flex:none;
+    background:rgba(255,255,255,.18);
+    border:1px solid rgba(255,255,255,.4);
+    border-radius:6px;
+    padding:6px 13px;
+    font-size:13px;font-weight:700;color:#fff;
+    white-space:nowrap;
+  }
+  .livebar:hover .lb-join{background:rgba(255,255,255,.28)}
+  @media (prefers-reduced-motion:reduce){
+    .livebar .lb-dot{animation:none}
+  }
+  @media (max-width:640px){
+    .livebar .lb-text{white-space:normal}
+  }
+
   /* ---------- install banner ---------- */
   .installbar{
     position:sticky;top:0;z-index:40;
@@ -685,6 +728,12 @@
   </div>
 </div>
 
+<a class="livebar" id="livebar" hidden target="_blank" rel="noopener">
+  <span class="lb-dot" aria-hidden="true"></span>
+  <span class="lb-text" id="livebarText"></span>
+  <span class="lb-join" id="livebarJoin">Join Zoom</span>
+</a>
+
 <div class="noticebar" id="noticebar" hidden role="status">
   <div class="notice-track" id="noticeTrack"></div>
 </div>
@@ -733,11 +782,6 @@
         <span class="prog">Executive MBA · Batch 2026</span>
       </span>
     </div>
-
-      <p class="contact">
-        <span class="clabel">Contact Megharaj for the site maintenance</span>
-        <a class="cmail" href="#">loading…</a>
-      </p>
     </div>
 
     <div class="termrow">
@@ -1505,6 +1549,39 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   track.innerHTML = '<span class="notice-half">' + itemsHtml + '<span class="notice-dot">•</span></span>' +
                      '<span class="notice-half">' + itemsHtml + '<span class="notice-dot">•</span></span>';
   bar.hidden = false;
+})();
+
+/* ── live class banner — shows the session currently in its time window, with a direct Zoom link ── */
+(function(){
+  const bar = document.getElementById("livebar");
+  const textEl = document.getElementById("livebarText");
+  const joinEl = document.getElementById("livebarJoin");
+  if(!bar) return;
+
+  function currentClass(){
+    const now = Date.now();
+    return RECORDINGS.find(r => !r.campus && stamp(r) <= now && now < endStamp(r));
+  }
+
+  function tick(){
+    const r = currentClass();
+    if(!r){ bar.hidden = true; bar.removeAttribute("href"); return; }
+    const s = sub(r.subject);
+    textEl.innerHTML = '<strong>Live now</strong>' + esc(s.code) + ' · ' + esc(r.subject) +
+      ' — ' + esc(r.lecture) + ' · ends ' + esc(r.ends || r.time);
+    if(r.url){
+      joinEl.textContent = "Join Zoom";
+      joinEl.hidden = false;
+      bar.href = r.url;
+    } else {
+      joinEl.hidden = true;
+      bar.removeAttribute("href");
+    }
+    bar.hidden = false;
+  }
+
+  tick();
+  setInterval(tick, 20000);
 })();
 
 /* ── live clock ── */
