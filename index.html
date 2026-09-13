@@ -1543,9 +1543,11 @@ function buildChips(){
   const names = ["All", ...new Set(sorted.map(r => r.subject))];
   chipBox.innerHTML = names.map(n => {
     const s = n === "All" ? null : sub(n);
-    return '<button class="chip" data-s="' + esc(n) + '" aria-pressed="' + (n === active) + '">' +
+    const label = n === "All" ? "All subjects" : s.code;
+    return '<button class="chip" data-s="' + esc(n) + '" aria-pressed="' + (n === active) + '"' +
+      (s ? ' title="' + esc(n) + '"' : "") + '>' +
       (s ? '<span class="swatch" style="background:' + s.color + '"></span>' : "") +
-      esc(n === "All" ? "All subjects" : n) + '</button>';
+      esc(label) + '</button>';
   }).join("");
 }
 
