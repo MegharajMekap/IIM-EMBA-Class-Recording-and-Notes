@@ -1886,8 +1886,11 @@ document.addEventListener("click", e => {
 
 qBox.addEventListener("input", render);
 
+// Update this date whenever the site content is edited/deployed.
+const SITE_LAST_UPDATED = "2026-09-13";
+
 document.getElementById("footNote").textContent =
-  sorted.length + " recordings, last updated " + longDate(sorted[0].date) + " " + d0(sorted[0].date).getFullYear();
+  "Site last updated " + longDate(SITE_LAST_UPDATED) + " " + d0(SITE_LAST_UPDATED).getFullYear();
 
 [].forEach.call(document.querySelectorAll(".cmail"), function(a){
   a.textContent = CONTACT.email;
