@@ -493,6 +493,23 @@
     padding:2px 5px;color:#fff;font-size:10px;font-weight:600;line-height:1.35;
   }
   .calChip-link{cursor:pointer}
+  .calChip-live{
+    box-shadow:0 0 0 1.5px #1E8A4C;
+    animation:calChipFlash 1.4s ease-in-out infinite;
+  }
+  .calChipDot{
+    flex:none;width:6px;height:6px;border-radius:50%;
+    background:#fff;
+    animation:livePulse 1.4s ease-in-out infinite;
+  }
+  @keyframes calChipFlash{
+    0%,100%{box-shadow:0 0 0 1.5px #1E8A4C}
+    50%{box-shadow:0 0 0 1.5px rgba(30,138,76,.15)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .calChip-live{animation:none}
+    .calChipDot{animation:none}
+  }
   .calChipText{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
   .calChipTime{font-weight:500;opacity:.85;margin-left:3px}
   .calChipAdd{
@@ -1266,6 +1283,7 @@ const cntNotes = document.getElementById("cnt-notes");
 const cntCalendar = document.getElementById("cnt-calendar");
 
 const endStamp = r => new Date(r.date + "T" + to24(r.ends || r.time)).getTime();
+const isLive = r => !r.campus && stamp(r) <= Date.now() && Date.now() < endStamp(r);
 const upcomingSorted = () => RECORDINGS.filter(r => endStamp(r) > Date.now()).sort((a,b) => stamp(a) - stamp(b));
 const pad2 = n => String(n).padStart(2, "0");
 
@@ -1340,10 +1358,12 @@ function calChip(r){
   const s = sub(r.subject);
   const idx = RECORDINGS.indexOf(r);
   const playable = !r.campus && !isPending(r) && !!r.url;
+  const live = isLive(r);
   const statusText = r.campus ? "Offline class" : (isPending(r) ? calLinkCell(r).replace(/<[^>]+>/g,"") : "");
-  const tip = r.subject + " — " + r.lecture + "\n" + slot(r) + (r.faculty ? "\n" + r.faculty : "") + (statusText ? "\n" + statusText : "");
-  return '<div class="calChip' + (playable ? ' calChip-link' : '') + '" style="background:' + s.color + '"' +
+  const tip = r.subject + " — " + r.lecture + "\n" + slot(r) + (r.faculty ? "\n" + r.faculty : "") + (statusText ? "\n" + statusText : "") + (live ? "\nLive now" : "");
+  return '<div class="calChip' + (playable ? ' calChip-link' : '') + (live ? ' calChip-live' : '') + '" style="background:' + s.color + '"' +
     ' title="' + esc(tip) + '"' + (playable ? ' data-url="' + esc(r.url) + '"' : '') + '>' +
+    (live ? '<span class="calChipDot" aria-hidden="true"></span>' : '') +
     '<span class="calChipText">' + esc(s.code) + ' · ' + esc(r.lecture) + ' <span class="calChipTime">' + esc(r.time || "") + '</span></span>' +
     '<button class="calChipAdd calBtn" data-ics="' + idx + '" aria-label="Add to calendar" title="Add to calendar">+</button>' +
   '</div>';
@@ -1554,8 +1574,7 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   if(!bar) return;
 
   function currentClass(){
-    const now = Date.now();
-    return RECORDINGS.find(r => !r.campus && stamp(r) <= now && now < endStamp(r));
+    return RECORDINGS.find(isLive);
   }
 
   function tick(){
@@ -1576,7 +1595,7 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   }
 
   tick();
-  setInterval(tick, 20000);
+  setInterval(function(){ tick(); renderCalendar(); }, 20000);
 })();
 
 /* ── live clock ── */
