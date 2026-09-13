@@ -248,7 +248,40 @@
     font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;
   }
   .tab[aria-selected="true"] .tabcount{background:rgba(255,255,255,.24);color:#fff}
-  .tabIcon{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:7px;flex:none}
+  .tabIcon{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-right:8px;flex:none}
+  .tab[aria-selected="true"] .iconPlay{
+    transform-origin:11.3px 12px;
+    animation:iconPlayPulse 1.8s ease-in-out infinite;
+  }
+  @keyframes iconPlayPulse{
+    0%,100%{transform:scale(1)}
+    50%{transform:scale(1.22)}
+  }
+  .tab[aria-selected="true"] .iconLines{
+    stroke-dasharray:11;
+    animation:iconWrite 2.2s ease-in-out infinite;
+  }
+  @keyframes iconWrite{
+    0%{stroke-dashoffset:11}
+    45%,60%{stroke-dashoffset:0}
+    100%{stroke-dashoffset:0}
+  }
+  .tab[aria-selected="true"] .iconDate{
+    transform-origin:9px 14.7px;
+    animation:iconDatePulse 1.8s ease-in-out infinite;
+  }
+  @keyframes iconDatePulse{
+    0%,100%{opacity:1;transform:scale(1)}
+    50%{opacity:.5;transform:scale(1.25)}
+  }
+  .tab:not([aria-selected="true"]):hover .tabIcon{animation:iconNudge .5s ease}
+  @keyframes iconNudge{
+    0%,100%{transform:translateY(0)}
+    50%{transform:translateY(-2px)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .iconPlay,.iconLines,.iconDate,.tab .tabIcon{animation:none!important}
+  }
   .tabpanel[hidden]{display:none}
   .newflag{
     font-size:9.5px;font-weight:700;letter-spacing:.03em;
@@ -954,9 +987,9 @@
   </header>
 
   <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tabBtn-recordings" aria-selected="true"><svg class="tabIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z"/></svg><span class="tabLabel">Recordings</span><sup class="newflag">New</sup><span class="tabcount" id="cnt-recordings"></span></button>
-    <button class="tab" role="tab" id="tabBtn-notes" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg><span class="tabLabel">Notes</span><span class="tabcount" id="cnt-notes"></span></button>
-    <button class="tab" role="tab" id="tabBtn-calendar" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="tabLabel">Calendar</span><span class="tabcount" id="cnt-calendar"></span></button>
+    <button class="tab" role="tab" id="tabBtn-recordings" aria-selected="true"><svg class="tabIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path class="iconPlay" d="M10.2 8.3l6 3.7-6 3.7z" fill="currentColor" stroke="none"/></svg><span class="tabLabel">Recordings</span><sup class="newflag">New</sup><span class="tabcount" id="cnt-recordings"></span></button>
+    <button class="tab" role="tab" id="tabBtn-notes" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path class="iconLines" d="M9 12.5h6M9 16.5h4"/></svg><span class="tabLabel">Notes</span><span class="tabcount" id="cnt-notes"></span></button>
+    <button class="tab" role="tab" id="tabBtn-calendar" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18"/><rect x="7" y="2.3" width="2" height="4.2" rx="1" fill="currentColor" stroke="none"/><rect x="15" y="2.3" width="2" height="4.2" rx="1" fill="currentColor" stroke="none"/><rect class="iconDate" x="7.3" y="13" width="3.4" height="3.4" rx="0.8" fill="currentColor" stroke="none"/></svg><span class="tabLabel">Calendar</span><span class="tabcount" id="cnt-calendar"></span></button>
   </nav>
 
   <div class="masthead-foot">
