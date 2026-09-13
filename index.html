@@ -127,9 +127,6 @@
     0%,100%{opacity:1}
     50%{opacity:.45}
   }
-  @media (prefers-reduced-motion:reduce){
-    .term .live{animation:none}
-  }
   h1{
     font-family:var(--serif);
     font-weight:700;
@@ -233,10 +230,6 @@
   @keyframes newFlash{
     0%,100%{opacity:1}
     50%{opacity:.4}
-  }
-  @media (prefers-reduced-motion:reduce){
-    .newflag{animation:none}
-    .tab{transition:none}
   }
   @media (max-width:520px){
     .tab{font-size:13px;padding:10px 4px}
@@ -514,16 +507,19 @@
     color:var(--navy);
     animation:newFlash 1.2s ease-in-out infinite;
   }
-  @media (prefers-reduced-motion:reduce){
-    .calTodayFlag{animation:none}
-  }
   .calChips{display:flex;flex-direction:column;gap:3px;overflow:hidden}
   .calChip{
     display:flex;align-items:center;gap:4px;border-radius:5px;
     padding:2px 5px;color:#fff;font-size:10px;font-weight:600;line-height:1.35;
   }
   .calChip-link{cursor:pointer}
-  .calChip-done{background:#DDE2EB;color:#8A93A8;font-weight:500}
+  .calChip-done{background:#DDE2EB;color:#8A93A8;font-weight:500;cursor:pointer}
+  .calChip-done:hover{background:#CBD2E0;color:#5D6892}
+  .recFlash{animation:recFlash 1.6s ease-out}
+  @keyframes recFlash{
+    0%{box-shadow:0 0 0 3px rgba(27,75,143,.55)}
+    100%{box-shadow:0 1px 2px rgba(22,35,58,.05),0 6px 16px rgba(22,35,58,.05)}
+  }
   .calChip-live{
     box-shadow:0 0 0 1.5px #1E8A4C;
     animation:calChipFlash 1.4s ease-in-out infinite;
@@ -536,10 +532,6 @@
   @keyframes calChipFlash{
     0%,100%{box-shadow:0 0 0 1.5px #1E8A4C}
     50%{box-shadow:0 0 0 1.5px rgba(30,138,76,.15)}
-  }
-  @media (prefers-reduced-motion:reduce){
-    .calChip-live{animation:none}
-    .calChipDot{animation:none}
   }
   .calChipText{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
   .calChipTime{font-weight:500;opacity:.85;margin-left:3px}
@@ -628,16 +620,10 @@
     border-radius:3px;padding:1px 4px;margin-left:6px;
     animation:newFlash 1.2s ease-in-out infinite;
   }
-  @media (prefers-reduced-motion:reduce){
-    .notice-newflag{animation:none}
-  }
   .notice-dot{margin:0 22px;opacity:.5}
   @keyframes noticeScroll{
     from{transform:translateX(-50%)}
     to{transform:translateX(0)}
-  }
-  @media (prefers-reduced-motion:reduce){
-    .notice-track{animation:none}
   }
 
   /* ---------- live class banner ---------- */
@@ -676,9 +662,6 @@
     white-space:nowrap;
   }
   .livebar:hover .lb-join{background:rgba(255,255,255,.28)}
-  @media (prefers-reduced-motion:reduce){
-    .livebar .lb-dot{animation:none}
-  }
   @media (max-width:640px){
     .livebar .lb-text{white-space:normal}
   }
@@ -742,46 +725,93 @@
   /* ---------- IP acknowledgment gate ---------- */
   .ackOverlay{
     position:fixed;inset:0;z-index:1000;
-    background:rgba(16,24,40,.62);
-    backdrop-filter:blur(3px);
+    background:rgba(16,24,40,.66);
+    backdrop-filter:blur(4px);
     display:flex;align-items:center;justify-content:center;
     padding:20px;
   }
   .ackOverlay[hidden]{display:none}
   .ackBox{
+    position:relative;
     background:var(--card);
-    border-radius:14px;
+    border-radius:16px;
     max-width:440px;width:100%;
-    padding:30px 30px 26px;
-    box-shadow:0 12px 40px rgba(16,24,40,.35);
+    padding:34px 32px 28px;
+    box-shadow:0 20px 60px rgba(16,24,40,.4);
     text-align:left;
+    overflow:hidden;
+    animation:ackIn .35s cubic-bezier(.2,.8,.3,1);
   }
+  .ackBox::before{
+    content:"";position:absolute;top:0;left:0;right:0;height:5px;
+    background:linear-gradient(90deg,var(--navy),#3E76C4);
+  }
+  @keyframes ackIn{
+    from{opacity:0;transform:translateY(10px) scale(.98)}
+    to{opacity:1;transform:translateY(0) scale(1)}
+  }
+  .ackIcon{
+    width:48px;height:48px;border-radius:12px;
+    background:var(--navy-tint);border:1px solid #DCE6F4;
+    display:flex;align-items:center;justify-content:center;
+    margin-bottom:16px;
+  }
+  .ackIcon svg{width:24px;height:24px;stroke:var(--navy);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .ackBox h2{
     font-family:var(--serif);font-weight:700;
-    font-size:1.35rem;margin:0 0 12px;color:var(--ink);
+    font-size:1.4rem;line-height:1.25;margin:0 0 14px;color:var(--ink);
   }
+  .ackBox h2 strong{font-weight:800;color:var(--navy)}
   .ackBox p{
-    margin:0 0 12px;color:var(--ink-soft);font-size:14.5px;line-height:1.55;
+    margin:0 0 14px;color:var(--ink-soft);font-size:14.5px;line-height:1.6;
   }
-  .ackBox p:last-of-type{margin-bottom:22px}
   .ackBox strong{color:var(--ink)}
+  .ackWarn{
+    display:flex;gap:10px;align-items:flex-start;
+    background:#FDF3EC;border:1px solid #F3DCC7;border-radius:9px;
+    padding:11px 13px;margin:0 0 24px;
+    font-size:13.5px;line-height:1.5;color:#8A4B1F;
+  }
+  .ackWarn svg{flex:none;width:16px;height:16px;stroke:#C2410C;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-top:1px}
   .ackGo{
     background:var(--navy);color:#fff;border:none;
-    border-radius:8px;padding:11px 20px;
+    border-radius:9px;padding:12px 20px;
     font-size:14.5px;font-weight:600;cursor:pointer;
     width:100%;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    box-shadow:0 4px 14px rgba(27,75,143,.28);
+    transition:background .15s ease,transform .15s ease,box-shadow .15s ease;
   }
-  .ackGo:hover{background:var(--navy-deep)}
+  .ackGo svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .ackGo:hover{background:var(--navy-deep);transform:translateY(-1px);box-shadow:0 6px 18px rgba(27,75,143,.36)}
+  .ackGo:active{transform:translateY(0)}
+  .ackGo.success{background:#1E8A4C;pointer-events:none;box-shadow:0 6px 18px rgba(30,138,76,.38)}
+  .ackGo.success:hover{background:#1E8A4C;transform:none}
+  .ackGo.success svg{animation:ackTick .45s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes ackTick{
+    0%{transform:scale(.3) rotate(-20deg);opacity:0}
+    60%{transform:scale(1.2) rotate(4deg);opacity:1}
+    100%{transform:scale(1) rotate(0deg);opacity:1}
+  }
 </style>
 </head>
 <body>
 
 <div class="ackOverlay" id="ackOverlay" role="dialog" aria-modal="true" aria-labelledby="ackTitle">
   <div class="ackBox">
-    <h2 id="ackTitle">Confidential — Intellectual Property Notice</h2>
+    <div class="ackIcon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M12 3l7 3.5v5c0 4.5-3 7.5-7 9.5-4-2-7-5-7-9.5v-5z"/><path d="M9.5 12l1.8 1.8L15 10"/></svg>
+    </div>
+    <h2 id="ackTitle"><strong>Confidential</strong> — Intellectual Property Notice</h2>
     <p>All recordings, notes, and materials on this site are the <strong>intellectual property of the Indian Institute of Management Kashipur (IIM Kashipur)</strong> and are provided solely for the use of enrolled EMBA batch participants.</p>
-    <p>Do not share, redistribute, or make this content accessible to any unauthorized person.</p>
-    <button class="ackGo" id="ackGo">I Acknowledge &amp; Agree</button>
+    <div class="ackWarn">
+      <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9L2.7 18a2 2 0 0 0 1.7 3h15.2a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>
+      <span>Do not share, redistribute, or make this content accessible to any unauthorized person.</span>
+    </div>
+    <button class="ackGo" id="ackGo">
+      <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+      <span id="ackGoLabel">I Acknowledge &amp; Agree</span>
+    </button>
   </div>
 </div>
 
@@ -903,10 +933,16 @@
 (function(){
   const overlay = document.getElementById("ackOverlay");
   const go = document.getElementById("ackGo");
+  const label = document.getElementById("ackGoLabel");
   document.body.style.overflow = "hidden";
   go.addEventListener("click", function(){
-    overlay.hidden = true;
-    document.body.style.overflow = "";
+    if(go.classList.contains("success")) return;
+    go.classList.add("success");
+    label.textContent = "Access granted";
+    setTimeout(function(){
+      overlay.hidden = true;
+      document.body.style.overflow = "";
+    }, 650);
   });
 })();
 </script>
@@ -1121,6 +1157,7 @@ function to24(t){
 const sorted = [...RECORDINGS].sort((a,b) => stamp(b) - stamp(a));
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const recId = r => "rec-" + r.date + "-" + String(r.time || "").replace(/[^0-9A-Za-z]+/g,"");
 
 function shade(hex, amt){
   const n = parseInt(hex.slice(1), 16);
@@ -1177,7 +1214,7 @@ function slot(r){
 
 function card(r){
   const s = sub(r.subject);
-  return '<article class="card' + (isPending(r) ? " pending" : "") + '">' + thumb(r) +
+  return '<article class="card' + (isPending(r) ? " pending" : "") + '" id="' + recId(r) + '">' + thumb(r) +
     '<div class="cbody">' +
       '<span class="subject" style="color:' + s.color + '"><span class="swatch" style="background:' + s.color + '"></span>' + esc(r.subject) + '</span>' +
       '<h3>' + esc(r.lecture) + '</h3>' +
@@ -1188,7 +1225,7 @@ function card(r){
 
 function featured(r){
   const s = sub(r.subject);
-  return '<section class="featured">' + thumb(r, true) +
+  return '<section class="featured" id="' + recId(r) + '">' + thumb(r, true) +
     '<div class="fbody">' +
       '<div class="flabel">Most recent class</div>' +
       '<h2>' + esc(r.lecture) + '</h2>' +
@@ -1410,8 +1447,8 @@ function calChip(r){
 
 function calChipDone(r){
   const s = sub(r.subject);
-  const tip = r.subject + " — " + r.lecture + "\n" + slot(r) + (r.faculty ? "\n" + r.faculty : "") + "\nCompleted";
-  return '<div class="calChip calChip-done" title="' + esc(tip) + '">' +
+  const tip = r.subject + " — " + r.lecture + "\n" + slot(r) + (r.faculty ? "\n" + r.faculty : "") + "\nCompleted · tap to view in Recordings";
+  return '<div class="calChip calChip-done" data-recid="' + esc(recId(r)) + '" title="' + esc(tip) + '">' +
     '<span class="calChipText">' + esc(s.code) + ' · ' + esc(r.lecture) + '</span>' +
   '</div>';
 }
@@ -1463,25 +1500,26 @@ function calMonthBlock(g, todayFlag, pastByMonth){
   '</div>';
 }
 
-function matchesFilter(r){
-  const q = qBox.value.trim().toLowerCase();
+function matchesFilter(r, q){
   if(active !== "All" && r.subject !== active) return false;
   if(!q) return true;
   return [r.lecture, r.subject, sub(r.subject).code, r.faculty, r.term, r.date].join(" ").toLowerCase().indexOf(q) > -1;
 }
 
 function todayFlagText(){
+  const q = qBox.value.trim().toLowerCase();
   const now0 = new Date();
   const todayISO = now0.getFullYear() + "-" + pad2(now0.getMonth()+1) + "-" + pad2(now0.getDate());
-  const todays = RECORDINGS.filter(r => r.date === todayISO && matchesFilter(r));
+  const todays = RECORDINGS.filter(r => r.date === todayISO && matchesFilter(r, q));
   if(!todays.length) return "No class today";
   if(todays.every(r => endStamp(r) <= Date.now())) return "Today's Classes Over";
   return "";
 }
 
 function pastByMonthMap(){
+  const q = qBox.value.trim().toLowerCase();
   const map = new Map();
-  RECORDINGS.filter(r => matchesFilter(r) && endStamp(r) <= Date.now()).forEach(r => {
+  RECORDINGS.filter(r => matchesFilter(r, q) && endStamp(r) <= Date.now()).forEach(r => {
     const d = d0(r.date);
     const key = d.getFullYear() + "-" + d.getMonth();
     if(!map.has(key)) map.set(key, []);
@@ -1496,7 +1534,7 @@ function renderCalendar(){
   cntCalendar.textContent = upcomingAll.length;
 
   const filtering = q !== "" || active !== "All";
-  const list = upcomingAll.filter(matchesFilter);
+  const list = upcomingAll.filter(r => matchesFilter(r, q));
 
   if(!upcomingAll.length){
     calOut.innerHTML = '<div class="empty"><h3>No classes left on the schedule</h3><p>Check back once the next term is added.</p></div>';
@@ -1549,6 +1587,21 @@ function buildChips(){
       (s ? '<span class="swatch" style="background:' + s.color + '"></span>' : "") +
       esc(label) + '</button>';
   }).join("");
+}
+
+function goToRecording(id){
+  qBox.value = "";
+  active = "All";
+  buildChips();
+  render();
+  setTab("recordings");
+  requestAnimationFrame(() => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+    el.classList.add("recFlash");
+    setTimeout(() => el.classList.remove("recFlash"), 1600);
+  });
 }
 
 function openYouTube(e, id, httpsUrl){
@@ -1611,6 +1664,11 @@ document.addEventListener("click", e => {
   const chipLink = e.target.closest(".calChip-link");
   if(chipLink && chipLink.dataset.url){
     window.open(chipLink.dataset.url, "_blank", "noopener");
+    return;
+  }
+  const doneChip = e.target.closest(".calChip-done");
+  if(doneChip && doneChip.dataset.recid){
+    goToRecording(doneChip.dataset.recid);
     return;
   }
 });
