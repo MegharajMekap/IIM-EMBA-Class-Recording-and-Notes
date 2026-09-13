@@ -1658,7 +1658,7 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   var top = document.getElementById("pwaRefreshTop");
   top.hidden = false;
 
-  top.addEventListener("click", function(){ location.reload(); });
+  top.addEventListener("click", function(){ location.href = location.pathname; });
 })();
 
 /* ── detect a newer version when the PWA is reopened from the background ──
@@ -1690,7 +1690,7 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
     }).catch(function(){}).finally(function(){ checking = false; });
   }
 
-  go.addEventListener("click", function(){ location.reload(); });
+  go.addEventListener("click", function(){ location.href = location.pathname; });
   close.addEventListener("click", function(){ bar.hidden = true; });
 
   document.addEventListener("visibilitychange", function(){
