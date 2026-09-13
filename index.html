@@ -112,6 +112,19 @@
     padding:5px 12px;
     margin-bottom:22px;
   }
+  .termrow{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px}
+  .termrow .term{margin-bottom:22px}
+  .clock{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:13px;color:var(--mute);
+    font-variant-numeric:tabular-nums;
+    margin-bottom:22px;
+  }
+  .clock .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:#1E8A4C;flex:none;
+    animation:livePulse 1.8s ease-in-out infinite;
+  }
   .term .live{
     color:#1E8A4C;font-weight:700;
     animation:livePulse 1.8s ease-in-out infinite;
@@ -207,6 +220,18 @@
   }
   .tab[aria-selected="true"] .tabcount{background:var(--navy);color:#fff}
   .tabpanel[hidden]{display:none}
+  .newflag{
+    font-size:9.5px;font-weight:700;letter-spacing:.03em;
+    color:#C2410C;margin-left:5px;
+    animation:newFlash 1.2s ease-in-out infinite;
+  }
+  @keyframes newFlash{
+    0%,100%{opacity:1}
+    50%{opacity:.25}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .newflag{animation:none}
+  }
 
   /* ---------- featured ---------- */
   .featured{
@@ -495,6 +520,29 @@
   }
 
 
+  /* ---------- notice marquee ---------- */
+  .noticebar{
+    overflow:hidden;white-space:nowrap;
+    background:linear-gradient(90deg,var(--navy-deep),var(--navy));
+    color:#fff;padding:9px 0;
+  }
+  .noticebar[hidden]{display:none}
+  .notice-track{
+    display:inline-flex;width:max-content;
+    animation:noticeScroll 28s linear infinite;
+  }
+  .noticebar:hover .notice-track{animation-play-state:paused}
+  .notice-half{display:inline-flex;align-items:center;padding-right:48px}
+  .notice-item{font-size:13.5px;font-weight:600;letter-spacing:.01em}
+  .notice-dot{margin:0 22px;opacity:.5}
+  @keyframes noticeScroll{
+    from{transform:translateX(-50%)}
+    to{transform:translateX(0)}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .notice-track{animation:none}
+  }
+
   /* ---------- install banner ---------- */
   .installbar{
     position:sticky;top:0;z-index:40;
@@ -554,6 +602,10 @@
 </head>
 <body>
 
+<div class="noticebar" id="noticebar" hidden role="status">
+  <div class="notice-track" id="noticeTrack"></div>
+</div>
+
 <div class="installbar" id="installbar" hidden>
   <div class="ib-icon" aria-hidden="true">
     <svg viewBox="0 0 24 24"><path d="M12 4v10m0 0l-4-4m4 4l4-4M5 18h14"/></svg>
@@ -605,7 +657,10 @@
       </p>
     </div>
 
-    <div class="term" id="termLabel">Batch 2026 · Term 1 Phase 2 <span class="live">in progress</span></div>
+    <div class="termrow">
+      <div class="term" id="termLabel">Batch 2026 · Term 1 Phase 2 <span class="live">in progress</span></div>
+      <div class="clock" id="liveClock"></div>
+    </div>
     <h1>EMBA Handbook</h1>
     <p class="standfirst">Your one-stop resource for the Executive MBA batch — class recordings, notes, and the upcoming schedule, all in one place. Open a session to watch the recording and use the passcode listed beside the link. Campus weeks are listed too, but those sessions were taught in person and have no recording.</p>
 
@@ -618,7 +673,7 @@
     </div>
 
     <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" id="tabBtn-recordings" data-panel="recordings" aria-selected="true">Recordings<span class="tabcount" id="cnt-recordings"></span></button>
+      <button class="tab" role="tab" id="tabBtn-recordings" data-panel="recordings" aria-selected="true">Recordings<sup class="newflag">NEW</sup><span class="tabcount" id="cnt-recordings"></span></button>
       <button class="tab" role="tab" id="tabBtn-notes" data-panel="notes" aria-selected="false">Notes<span class="tabcount" id="cnt-notes"></span></button>
       <button class="tab" role="tab" id="tabBtn-calendar" data-panel="calendar" aria-selected="false">Calendar<span class="tabcount" id="cnt-calendar"></span></button>
     </nav>
@@ -843,6 +898,11 @@ const NOTES = [
   { subject:"Organizational Behaviour",         title:"Case pack for the group discussion",               kind:"PDF",    date:"2026-09-13", url:"" },
   { subject:"Executive Communications",         title:"Presentation assignment brief and rubric",         kind:"Doc",    date:"2026-09-19", url:"" }
 
+];
+
+/* ── 3b. Notice marquee — short scrolling announcements at the top ── */
+const NOTICES = [
+  "Offline classes begin on 26th and 27th September 2026"
 ];
 
 /* ── 4. Who looks after this page ── */
@@ -1284,6 +1344,31 @@ render();
 cntRecordings.textContent = sorted.length;
 cntNotes.textContent = NOTES.length;
 setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.hash.slice(1) : "recordings");
+
+/* ── notice marquee ── */
+(function(){
+  if(!NOTICES.length) return;
+  const bar = document.getElementById("noticebar");
+  const track = document.getElementById("noticeTrack");
+  const itemsHtml = NOTICES.map(n => '<span class="notice-item">' + esc(n) + '</span>').join('<span class="notice-dot">•</span>');
+  track.innerHTML = '<span class="notice-half">' + itemsHtml + '<span class="notice-dot">•</span></span>' +
+                     '<span class="notice-half">' + itemsHtml + '<span class="notice-dot">•</span></span>';
+  bar.hidden = false;
+})();
+
+/* ── live clock ── */
+(function(){
+  const el = document.getElementById("liveClock");
+  if(!el) return;
+  function tick(){
+    const now = new Date();
+    const dateStr = now.toLocaleDateString(undefined, { weekday:"short", day:"numeric", month:"short" });
+    const timeStr = now.toLocaleTimeString(undefined, { hour:"2-digit", minute:"2-digit", second:"2-digit" });
+    el.innerHTML = '<span class="dot"></span>' + esc(dateStr) + ' · ' + esc(timeStr);
+  }
+  tick();
+  setInterval(tick, 1000);
+})();
 
 /* ── add to home screen ── */
 (function(){
