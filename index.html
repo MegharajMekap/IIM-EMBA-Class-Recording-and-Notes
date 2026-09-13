@@ -1649,11 +1649,8 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   }
 })();
 
-/* ── manual refresh buttons (PWA/standalone only — browser tabs already have one) ── */
+/* ── manual refresh button (shown in every view — browser tab or installed PWA) ── */
 (function(){
-  var isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true;
-  if(!isStandalone) return;
-
   var top = document.getElementById("pwaRefreshTop");
   top.hidden = false;
 
