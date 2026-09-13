@@ -241,6 +241,9 @@
   @media (max-width:520px){
     .tab{font-size:13px;padding:10px 4px}
     .tabcount{min-width:18px;height:18px;font-size:11px;margin-left:6px}
+    .tab:not([aria-selected="true"]) .tabLabel{display:none}
+    .tab:not([aria-selected="true"]) .tabIcon{margin-right:0}
+    .tab:not([aria-selected="true"]) .newflag{margin-left:4px}
   }
 
   /* ---------- featured ---------- */
@@ -846,9 +849,9 @@
     <p class="standfirst">Your one-stop resource for the Executive MBA batch — class recordings, notes, and the upcoming schedule, all in one place. Open a session to watch the recording and use the passcode listed beside the link. Campus weeks are listed too, but those sessions were taught in person and have no recording.</p>
 
     <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" id="tabBtn-recordings" aria-selected="true"><svg class="tabIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z"/></svg>Recordings<sup class="newflag">New</sup><span class="tabcount" id="cnt-recordings"></span></button>
-      <button class="tab" role="tab" id="tabBtn-notes" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg>Notes<span class="tabcount" id="cnt-notes"></span></button>
-      <button class="tab" role="tab" id="tabBtn-calendar" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>Calendar<span class="tabcount" id="cnt-calendar"></span></button>
+      <button class="tab" role="tab" id="tabBtn-recordings" aria-selected="true"><svg class="tabIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z"/></svg><span class="tabLabel">Recordings</span><sup class="newflag">New</sup><span class="tabcount" id="cnt-recordings"></span></button>
+      <button class="tab" role="tab" id="tabBtn-notes" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg><span class="tabLabel">Notes</span><span class="tabcount" id="cnt-notes"></span></button>
+      <button class="tab" role="tab" id="tabBtn-calendar" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="tabLabel">Calendar</span><span class="tabcount" id="cnt-calendar"></span></button>
     </nav>
 
     <div class="controls">
