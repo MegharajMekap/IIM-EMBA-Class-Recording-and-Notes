@@ -1882,9 +1882,6 @@ document.addEventListener("click", e => {
 
 qBox.addEventListener("input", render);
 
-// Update this whenever the site content is edited/deployed (IST date & time).
-const SITE_LAST_UPDATED = "2026-09-13T21:30:00+05:30";
-
 // Computed manually (not via Intl timeZone) so it also works on mobile
 // browsers whose built-in ICU data lacks full timezone support.
 function toIST(date){
@@ -1894,7 +1891,9 @@ function toIST(date){
 
 (function(){
   const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-  const ist = toIST(new Date(SITE_LAST_UPDATED));
+  // document.lastModified reflects this file's actual last-modified time
+  // (server Last-Modified header, or filesystem mtime when opened locally).
+  const ist = toIST(new Date(document.lastModified));
   const dateStr = ist.getDate() + " " + MONTHS[ist.getMonth()] + " " + ist.getFullYear();
   let h = ist.getHours();
   const ampm = h >= 12 ? "PM" : "AM";
