@@ -1886,11 +1886,20 @@ document.addEventListener("click", e => {
 
 qBox.addEventListener("input", render);
 
-// Update this date whenever the site content is edited/deployed.
-const SITE_LAST_UPDATED = "2026-09-13";
+// Update this whenever the site content is edited/deployed (IST date & time).
+const SITE_LAST_UPDATED = "2026-09-13T21:30:00+05:30";
 
-document.getElementById("footNote").textContent =
-  "Site last updated " + longDate(SITE_LAST_UPDATED) + " " + d0(SITE_LAST_UPDATED).getFullYear();
+(function(){
+  const d = new Date(SITE_LAST_UPDATED);
+  const dateStr = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Kolkata", day:"numeric", month:"long", year:"numeric"
+  }).format(d);
+  const timeStr = new Intl.DateTimeFormat("en-IN", {
+    timeZone: "Asia/Kolkata", hour:"numeric", minute:"2-digit", hour12:true
+  }).format(d);
+  document.getElementById("footNote").textContent =
+    "Site last updated " + dateStr + " · " + timeStr + " IST";
+})();
 
 [].forEach.call(document.querySelectorAll(".cmail"), function(a){
   a.textContent = CONTACT.email;
