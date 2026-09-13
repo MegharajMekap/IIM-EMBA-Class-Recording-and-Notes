@@ -512,24 +512,33 @@
   .calMonth{margin-bottom:30px}
   .calMonth:last-child{margin-bottom:0}
   .calMonthCard{
-    border-radius:11px;overflow:hidden;box-shadow:var(--lift);border:1px solid var(--line);
+    border-radius:14px;overflow:hidden;box-shadow:var(--lift);border:1px solid var(--line);
   }
   .calMonthHeader{
-    background:#D64536;color:#fff;padding:11px 16px;
+    background:linear-gradient(135deg,#D9503F,#C23A2D);color:#fff;padding:13px 18px;
   }
-  .calMonthHeader .calMonthName{font-weight:700;font-size:17px}
-  .calMonthHeader .calMonthYear{font-weight:600;font-size:13px;opacity:.85;margin-left:5px}
+  .calMonthHeader .calMonthName{font-weight:700;font-size:17px;letter-spacing:.01em}
+  .calMonthHeader .calMonthYear{font-weight:600;font-size:13px;opacity:.8;margin-left:5px}
   .calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line)}
   .calDow{
     background:var(--navy-tint);color:var(--navy);text-align:center;
-    font-size:11px;font-weight:700;letter-spacing:.02em;padding:6px 2px;
+    font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;padding:8px 2px;
   }
-  .calCell{background:var(--card);min-height:92px;padding:6px 5px;display:flex;flex-direction:column;gap:4px}
-  .calCell-blank{background:var(--navy-tint)}
-  .calDayNum{font-size:12px;font-weight:700;color:var(--ink-soft)}
+  .calDow:nth-child(7n+1),.calDow:nth-child(7n){color:#9B3F52}
+  .calCell{
+    background:var(--card);min-height:96px;padding:7px 6px;display:flex;flex-direction:column;gap:4px;
+    transition:background-color .15s ease;
+  }
+  .calCell:nth-child(7n+1),.calCell:nth-child(7n){background:#FBF8F7}
+  .calCell:hover{background:var(--navy-tint)}
+  .calCell-blank{background:var(--page)}
+  .calCell-blank:hover{background:var(--page)}
+  .calCell:has(.calToday){background:var(--navy-tint);box-shadow:inset 0 0 0 1.5px var(--navy)}
+  .calDayNum{font-size:11.5px;font-weight:700;color:var(--ink-soft)}
   .calToday{
     display:inline-flex;align-items:center;justify-content:center;
     width:20px;height:20px;border-radius:50%;background:var(--navy);color:#fff;
+    box-shadow:0 0 0 3px var(--navy-tint);
   }
   .calTodayFlag{
     flex:1;display:flex;align-items:center;justify-content:center;
@@ -540,11 +549,14 @@
   }
   .calChips{display:flex;flex-direction:column;gap:3px;overflow:hidden}
   .calChip{
-    display:flex;align-items:center;gap:4px;border-radius:5px;
-    padding:2px 5px;color:#fff;font-size:10px;font-weight:600;line-height:1.35;
+    display:flex;align-items:center;gap:4px;border-radius:6px;
+    padding:3px 6px;color:#fff;font-size:10px;font-weight:600;line-height:1.35;
+    box-shadow:0 1px 2px rgba(22,35,58,.14);
+    transition:transform .12s ease,box-shadow .12s ease;
   }
   .calChip-link{cursor:pointer}
-  .calChip-done{background:#DDE2EB;color:#8A93A8;font-weight:500;cursor:pointer}
+  .calChip-link:hover{transform:translateY(-1px);box-shadow:0 3px 7px rgba(22,35,58,.25)}
+  .calChip-done{background:#DDE2EB;color:#8A93A8;font-weight:500;cursor:pointer;box-shadow:none}
   .calChip-done:hover{background:#CBD2E0;color:#5D6892}
   .recFlash{animation:recFlash 1.6s ease-out}
   @keyframes recFlash{
@@ -575,27 +587,57 @@
   .caltable{
     width:100%;border-collapse:collapse;
     background:var(--card);border:1px solid var(--line);
-    border-radius:11px;overflow:hidden;box-shadow:var(--lift);
-    font-size:14px;margin-top:14px;
+    border-radius:12px;overflow:hidden;box-shadow:var(--lift);
+    font-size:13.5px;margin-top:14px;
   }
   .caltable th{
-    text-align:left;font-size:12.5px;font-weight:600;color:#fff;
-    padding:11px 14px;border-bottom:1px solid var(--line);
+    text-align:left;font-size:10.5px;font-weight:700;color:rgba(255,255,255,.92);
+    text-transform:uppercase;letter-spacing:.06em;
+    padding:12px 14px;border-bottom:1px solid var(--line);
     background:var(--navy);
   }
-  .caltable td{padding:11px 14px;border-top:1px solid var(--line-soft);vertical-align:middle}
-  .calBrk{display:inline-block;margin-top:3px;font-size:12px;color:#D4756B}
-  .caltable tr:first-child td{border-top:none}
+  .caltable td{padding:12px 14px;border-top:1px solid var(--line-soft);vertical-align:middle;position:relative}
+  .caltable tbody tr:first-child td{border-top:none}
+  .caltable tbody tr:nth-child(even){background:var(--line-soft)}
+  .caltable tbody tr{transition:background-color .15s ease}
+  .caltable tbody tr:hover{background:var(--navy-tint)}
+  .caltable tbody tr td:first-child::before{
+    content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+    background:var(--accent,transparent);
+  }
+  .calDateDow{display:block;font-size:10px;font-weight:700;color:var(--mute);text-transform:uppercase;letter-spacing:.04em}
+  .calDateNum{display:block;font-size:13.5px;font-weight:700;color:var(--ink);margin-top:1px}
+  .calSubjFull{font-weight:600}
+  .calLecture{color:var(--ink-soft);font-weight:500}
+  .calSlot{
+    display:inline-block;font-size:12px;font-weight:600;color:var(--ink-soft);
+    background:var(--navy-tint);padding:4px 10px;border-radius:20px;white-space:nowrap;
+  }
+  .calBrk{
+    display:inline-block;margin-top:6px;font-size:11px;font-weight:600;color:#B5504A;
+    background:#FBEAE8;padding:3px 9px;border-radius:20px;white-space:nowrap;
+  }
   .caltable a{color:var(--navy);font-weight:600;text-decoration:none}
   .caltable a:hover{text-decoration:underline}
   .calBtn{
     background:var(--card);border:1px solid var(--line);border-radius:7px;
-    padding:7px 12px;font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;
-    display:inline-flex;align-items:center;gap:6px;
+    padding:6px 11px;font-size:12.5px;font-weight:600;color:var(--ink-soft);cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;white-space:nowrap;
   }
-  .calBtn:hover{border-color:var(--navy);color:var(--navy)}
+  .calBtn:hover{border-color:var(--navy);color:var(--navy);background:var(--navy-tint)}
   .calBtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
   .calChipAdd svg{width:9px;height:9px}
+  .calSubjCode{display:none}
+  @media (max-width:520px){
+    .caltable th:nth-child(3),
+    .caltable td:nth-child(3){display:none}
+    .caltable .calSubjFull{display:none}
+    .caltable .calSubjCode{
+      display:inline-block;font-weight:700;border:1px solid;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11.5px;padding:3px 8px;border-radius:20px;
+    }
+  }
 
   footer{
     border-top:1px solid var(--line);
@@ -1481,11 +1523,13 @@ function calLinkCell(r){
 function calRow(r){
   const s = sub(r.subject);
   const d = d0(r.date);
-  return '<tr>' +
-    '<td>' + DOW[d.getDay()].slice(0,3) + ' ' + d.getDate() + ' ' + MON[d.getMonth()].slice(0,3) + '</td>' +
-    '<td><span style="color:' + s.color + ';font-weight:600">' + esc(r.subject) + '</span></td>' +
-    '<td>' + esc(r.lecture) + '</td>' +
-    '<td>' + slot(r) + (r.brk ? '<br><span class="calBrk">☕ Break: ' + esc(r.brk) + '</span>' : '') + '</td>' +
+  return '<tr style="--accent:' + s.color + '">' +
+    '<td><span class="calDateDow">' + DOW[d.getDay()].slice(0,3) + '</span>' +
+      '<span class="calDateNum">' + d.getDate() + ' ' + MON[d.getMonth()].slice(0,3) + '</span></td>' +
+    '<td><span class="calSubjFull" style="color:' + s.color + '">' + esc(r.subject) + '</span>' +
+      '<span class="calSubjCode" style="color:' + s.color + ';background:' + s.color + '1A;border-color:' + s.color + '40">' + esc(s.code) + '</span></td>' +
+    '<td class="calLecture">' + esc(r.lecture) + '</td>' +
+    '<td><span class="calSlot">' + slot(r) + '</span>' + (r.brk ? '<br><span class="calBrk">☕ Break: ' + esc(r.brk) + '</span>' : '') + '</td>' +
     '<td>' + calLinkCell(r) + '</td>' +
     '<td><a class="calBtn" href="' + esc(googleCalUrl(r)) + '" target="_blank" rel="noopener">' +
       '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M12 14v6M9 17h6"/></svg>' +
