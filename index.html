@@ -1179,7 +1179,7 @@ function downloadICS(r){
 }
 
 function calLinkCell(r){
-  if(r.campus) return "—";
+  if(r.campus) return "Offline class";
   if(isPending(r)){
     const code = sub(r.subject).code;
     const expired = code === "BS" || code === "MM1" || code === "MM2";
