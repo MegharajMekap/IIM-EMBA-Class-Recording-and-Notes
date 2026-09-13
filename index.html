@@ -262,28 +262,29 @@
   .tabIcon{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-right:8px;flex:none}
   .tab[aria-selected="true"] .iconPlay{
     transform-origin:11.3px 12px;
-    animation:iconPlayPulse 1.8s ease-in-out infinite;
+    animation:iconPlayPop .45s cubic-bezier(.34,1.56,.64,1) 1;
   }
-  @keyframes iconPlayPulse{
-    0%,100%{transform:scale(1)}
-    50%{transform:scale(1.22)}
+  @keyframes iconPlayPop{
+    0%{transform:scale(.6)}
+    70%{transform:scale(1.15)}
+    100%{transform:scale(1)}
   }
   .tab[aria-selected="true"] .iconLines{
     stroke-dasharray:11;
-    animation:iconWrite 2.2s ease-in-out infinite;
+    animation:iconWrite .5s ease-out 1;
   }
   @keyframes iconWrite{
     0%{stroke-dashoffset:11}
-    45%,60%{stroke-dashoffset:0}
     100%{stroke-dashoffset:0}
   }
   .tab[aria-selected="true"] .iconDate{
     transform-origin:9px 14.7px;
-    animation:iconDatePulse 1.8s ease-in-out infinite;
+    animation:iconDatePop .45s cubic-bezier(.34,1.56,.64,1) 1;
   }
-  @keyframes iconDatePulse{
-    0%,100%{opacity:1;transform:scale(1)}
-    50%{opacity:.5;transform:scale(1.25)}
+  @keyframes iconDatePop{
+    0%{transform:scale(.6);opacity:.4}
+    70%{transform:scale(1.15)}
+    100%{transform:scale(1);opacity:1}
   }
   .tab:not([aria-selected="true"]):hover .tabIcon{animation:iconNudge .5s ease}
   @keyframes iconNudge{
@@ -299,13 +300,8 @@
     color:#C2410C;background:rgba(194,65,12,.12);
     border-radius:4px;padding:1px 5px;margin-left:5px;
     vertical-align:middle;
-    animation:newFlash 1.2s ease-in-out infinite;
   }
   .tab[aria-selected="true"] .newflag{color:#fff;background:rgba(255,255,255,.24)}
-  @keyframes newFlash{
-    0%,100%{opacity:1}
-    50%{opacity:.4}
-  }
   @media (max-width:520px){
     .tab{font-size:13px;padding:10px 4px}
     .tabcount{min-width:18px;height:18px;font-size:11px;margin-left:6px}
@@ -1889,14 +1885,22 @@ qBox.addEventListener("input", render);
 // Update this whenever the site content is edited/deployed (IST date & time).
 const SITE_LAST_UPDATED = "2026-09-13T21:30:00+05:30";
 
+// Computed manually (not via Intl timeZone) so it also works on mobile
+// browsers whose built-in ICU data lacks full timezone support.
+function toIST(date){
+  const utcMs = date.getTime() + date.getTimezoneOffset() * 60000;
+  return new Date(utcMs + 5.5 * 60 * 60000);
+}
+
 (function(){
-  const d = new Date(SITE_LAST_UPDATED);
-  const dateStr = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Asia/Kolkata", day:"numeric", month:"long", year:"numeric"
-  }).format(d);
-  const timeStr = new Intl.DateTimeFormat("en-IN", {
-    timeZone: "Asia/Kolkata", hour:"numeric", minute:"2-digit", hour12:true
-  }).format(d);
+  const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const ist = toIST(new Date(SITE_LAST_UPDATED));
+  const dateStr = ist.getDate() + " " + MONTHS[ist.getMonth()] + " " + ist.getFullYear();
+  let h = ist.getHours();
+  const ampm = h >= 12 ? "PM" : "AM";
+  h = h % 12; if(h === 0) h = 12;
+  const m = String(ist.getMinutes()).padStart(2, "0");
+  const timeStr = h + ":" + m + " " + ampm;
   document.getElementById("footNote").textContent =
     "Site last updated " + dateStr + " · " + timeStr + " IST";
 })();
@@ -1988,9 +1992,7 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   if(!greetEl || !restEl) return;
 
   function greeting(){
-    const istHour = Number(new Intl.DateTimeFormat("en-US", {
-      timeZone: "Asia/Kolkata", hour: "numeric", hour12: false
-    }).format(new Date()));
+    const istHour = toIST(new Date()).getHours();
     if(istHour < 12) return "Good Morning";
     if(istHour < 17) return "Good Afternoon";
     return "Good Evening";
