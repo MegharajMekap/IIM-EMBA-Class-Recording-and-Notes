@@ -473,8 +473,9 @@
   }
   .calMonthHeader{
     background:#D64536;color:#fff;padding:11px 16px;
-    font-weight:700;font-size:14.5px;
   }
+  .calMonthHeader .calMonthName{font-weight:700;font-size:17px}
+  .calMonthHeader .calMonthYear{font-weight:600;font-size:13px;opacity:.85;margin-left:5px}
   .calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line)}
   .calDow{
     background:var(--navy-tint);color:var(--navy);text-align:center;
@@ -487,12 +488,23 @@
     display:inline-flex;align-items:center;justify-content:center;
     width:20px;height:20px;border-radius:50%;background:var(--navy);color:#fff;
   }
+  .calTodayFlag{
+    flex:1;display:flex;align-items:center;justify-content:center;
+    text-align:center;white-space:normal;line-height:1.15;
+    font-size:1.05rem;font-weight:800;letter-spacing:.01em;
+    color:var(--navy);
+    animation:newFlash 1.2s ease-in-out infinite;
+  }
+  @media (prefers-reduced-motion:reduce){
+    .calTodayFlag{animation:none}
+  }
   .calChips{display:flex;flex-direction:column;gap:3px;overflow:hidden}
   .calChip{
     display:flex;align-items:center;gap:4px;border-radius:5px;
     padding:2px 5px;color:#fff;font-size:10px;font-weight:600;line-height:1.35;
   }
   .calChip-link{cursor:pointer}
+  .calChip-done{background:#DDE2EB;color:#8A93A8;font-weight:500}
   .calChip-live{
     box-shadow:0 0 0 1.5px #1E8A4C;
     animation:calChipFlash 1.4s ease-in-out infinite;
@@ -573,6 +585,7 @@
     .calDow{font-size:9.5px;padding:4px 2px}
     .calChip{padding:2px 3px}
     .calChipTime{display:none}
+    .calTodayFlag{font-size:.7rem}
   }
 
 
@@ -1363,7 +1376,15 @@ function calChip(r){
   '</div>';
 }
 
-function calMonthGrid(year, month, items){
+function calChipDone(r){
+  const s = sub(r.subject);
+  const tip = r.subject + " — " + r.lecture + "\n" + slot(r) + (r.faculty ? "\n" + r.faculty : "") + "\nCompleted";
+  return '<div class="calChip calChip-done" title="' + esc(tip) + '">' +
+    '<span class="calChipText">' + esc(s.code) + ' · ' + esc(r.lecture) + '</span>' +
+  '</div>';
+}
+
+function calMonthGrid(year, month, items, todayFlag, pastItems){
   const first = new Date(year, month, 1);
   const startDow = first.getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -1373,15 +1394,23 @@ function calMonthGrid(year, month, items){
     if(!byDay.has(day)) byDay.set(day, []);
     byDay.get(day).push(r);
   });
+  const byDayPast = new Map();
+  (pastItems || []).forEach(r => {
+    const day = d0(r.date).getDate();
+    if(!byDayPast.has(day)) byDayPast.set(day, []);
+    byDayPast.get(day).push(r);
+  });
   const today = new Date(); today.setHours(0,0,0,0);
   let cells = DOW.map(d => '<div class="calDow">' + d.slice(0,3) + '</div>').join("");
   for(let i=0;i<startDow;i++) cells += '<div class="calCell calCell-blank"></div>';
   for(let day=1; day<=daysInMonth; day++){
     const isToday = new Date(year, month, day).getTime() === today.getTime();
     const dayItems = (byDay.get(day) || []).slice().sort((a,b) => stamp(a) - stamp(b));
+    const doneItems = dayItems.length ? [] : (byDayPast.get(day) || []).slice().sort((a,b) => stamp(a) - stamp(b));
     cells += '<div class="calCell">' +
       '<span class="calDayNum' + (isToday ? ' calToday' : '') + '">' + day + '</span>' +
-      '<div class="calChips">' + dayItems.map(calChip).join("") + '</div>' +
+      (isToday && todayFlag ? '<span class="calTodayFlag">' + todayFlag + '</span>' : '') +
+      '<div class="calChips">' + dayItems.map(calChip).join("") + doneItems.map(calChipDone).join("") + '</div>' +
     '</div>';
   }
   const trailing = (7 - ((startDow + daysInMonth) % 7)) % 7;
@@ -1389,17 +1418,44 @@ function calMonthGrid(year, month, items){
   return '<div class="calGrid">' + cells + '</div>';
 }
 
-function calMonthBlock(g){
-  const label = MON[g.month] + " " + g.year;
+function calMonthBlock(g, todayFlag, pastByMonth){
+  const key = g.year + "-" + g.month;
   return '<div class="calMonth">' +
     '<div class="calMonthCard">' +
-      '<div class="calMonthHeader">' + label + ' · ' + g.items.length + ' class' + (g.items.length > 1 ? "es" : "") + '</div>' +
-      calMonthGrid(g.year, g.month, g.items) +
+      '<div class="calMonthHeader"><span class="calMonthName">' + MON[g.month] + '</span><span class="calMonthYear">' + g.year + '</span></div>' +
+      calMonthGrid(g.year, g.month, g.items, todayFlag, pastByMonth.get(key)) +
     '</div>' +
     '<div style="overflow-x:auto"><table class="caltable"><thead><tr>' +
       '<th>Date</th><th>Subject</th><th>Session</th><th>Time</th><th>Link</th><th>Add</th>' +
     '</tr></thead><tbody>' + g.items.map(calRow).join("") + '</tbody></table></div>' +
   '</div>';
+}
+
+function matchesFilter(r){
+  const q = qBox.value.trim().toLowerCase();
+  if(active !== "All" && r.subject !== active) return false;
+  if(!q) return true;
+  return [r.lecture, r.subject, sub(r.subject).code, r.faculty, r.term, r.date].join(" ").toLowerCase().indexOf(q) > -1;
+}
+
+function todayFlagText(){
+  const now0 = new Date();
+  const todayISO = now0.getFullYear() + "-" + pad2(now0.getMonth()+1) + "-" + pad2(now0.getDate());
+  const todays = RECORDINGS.filter(r => r.date === todayISO && matchesFilter(r));
+  if(!todays.length) return "No class today";
+  if(todays.every(r => endStamp(r) <= Date.now())) return "Today's Classes Over";
+  return "";
+}
+
+function pastByMonthMap(){
+  const map = new Map();
+  RECORDINGS.filter(r => matchesFilter(r) && endStamp(r) <= Date.now()).forEach(r => {
+    const d = d0(r.date);
+    const key = d.getFullYear() + "-" + d.getMonth();
+    if(!map.has(key)) map.set(key, []);
+    map.get(key).push(r);
+  });
+  return map;
 }
 
 function renderCalendar(){
@@ -1408,11 +1464,7 @@ function renderCalendar(){
   cntCalendar.textContent = upcomingAll.length;
 
   const filtering = q !== "" || active !== "All";
-  const list = upcomingAll.filter(r => {
-    if(active !== "All" && r.subject !== active) return false;
-    if(!q) return true;
-    return [r.lecture, r.subject, sub(r.subject).code, r.faculty, r.term, r.date].join(" ").toLowerCase().indexOf(q) > -1;
-  });
+  const list = upcomingAll.filter(matchesFilter);
 
   if(!upcomingAll.length){
     calOut.innerHTML = '<div class="empty"><h3>No classes left on the schedule</h3><p>Check back once the next term is added.</p></div>';
@@ -1428,8 +1480,10 @@ function renderCalendar(){
   }
 
   const months = groupByMonth(list);
+  const todayFlag = todayFlagText();
+  const pastByMonth = pastByMonthMap();
   calOut.innerHTML = '<p class="calLegend">Tap a class or its “Open link” to view the recording · tap + to add it to your own calendar.</p>' +
-    months.map(calMonthBlock).join("");
+    months.map(g => calMonthBlock(g, todayFlag, pastByMonth)).join("");
 
   caltally.textContent = filtering
     ? list.length + " of " + upcomingAll.length + " upcoming classes"
