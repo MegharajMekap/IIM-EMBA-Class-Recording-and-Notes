@@ -1056,9 +1056,13 @@ const NOTES = [
   { subject:"Financial Reporting and Analysis", title:"ICAI reference book — accounting fundamentals",    kind:"PDF",    date:"2026-09-05", url:"FRA_Notes/ICAI_BOOK.pdf" }
 ];
 
-/* ── 3b. Notice marquee — short scrolling announcements at the top ── */
+/* ── 3b. Notice marquee — short scrolling announcements at the top ──
+   text    → the announcement
+   expires → optional ISO datetime (with timezone offset). Once past,
+             the notice drops out on its own — no manual cleanup needed. ── */
 const NOTICES = [
-  "Offline classes begin on 26th and 27th September 2026"
+  { text:"Offline classes begin on 26th and 27th September 2026", expires:"2026-09-25T23:59:00+05:30" },
+  { text:"FRA Quiz 2 will be held coming Saturday (19th Sept')", expires:"2026-09-19T13:00:00+05:30" }
 ];
 
 /* ── 4. Who looks after this page ── */
@@ -1600,15 +1604,33 @@ cntRecordings.textContent = sorted.length;
 cntNotes.textContent = NOTES.length;
 setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.hash.slice(1) : "recordings");
 
-/* ── notice marquee ── */
+/* ── notice marquee — notices with an "expires" time drop out on their own ── */
 (function(){
   if(!NOTICES.length) return;
   const bar = document.getElementById("noticebar");
   const track = document.getElementById("noticeTrack");
-  const itemsHtml = NOTICES.map(n => '<span class="notice-item">' + esc(n) + '</span>').join('<span class="notice-dot">•</span>');
-  track.innerHTML = '<span class="notice-half">' + itemsHtml + '<span class="notice-dot">•</span></span>' +
-                     '<span class="notice-half">' + itemsHtml + '<span class="notice-dot">•</span></span>';
-  bar.hidden = false;
+  let shownKey = null;
+
+  function activeNotices(){
+    const now = Date.now();
+    return NOTICES.filter(n => !n.expires || new Date(n.expires).getTime() > now);
+  }
+
+  function tick(){
+    const active = activeNotices();
+    if(!active.length){ bar.hidden = true; return; }
+    const key = active.map(n => n.text).join("|");
+    if(key !== shownKey){
+      shownKey = key;
+      const itemsHtml = active.map(n => '<span class="notice-item">' + esc(n.text) + '</span>').join('<span class="notice-dot">•</span>');
+      track.innerHTML = '<span class="notice-half">' + itemsHtml + '<span class="notice-dot">•</span></span>' +
+                         '<span class="notice-half">' + itemsHtml + '<span class="notice-dot">•</span></span>';
+    }
+    bar.hidden = false;
+  }
+
+  tick();
+  setInterval(tick, 60000);
 })();
 
 /* ── live class banner — shows the session currently in its time window, with a direct Zoom link ── */
