@@ -596,9 +596,52 @@
     html{scroll-behavior:auto}
     *{transition:none!important;animation:none!important}
   }
+
+  /* ---------- IP acknowledgment gate ---------- */
+  .ackOverlay{
+    position:fixed;inset:0;z-index:1000;
+    background:rgba(16,24,40,.62);
+    backdrop-filter:blur(3px);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+  }
+  .ackOverlay[hidden]{display:none}
+  .ackBox{
+    background:var(--card);
+    border-radius:14px;
+    max-width:440px;width:100%;
+    padding:30px 30px 26px;
+    box-shadow:0 12px 40px rgba(16,24,40,.35);
+    text-align:left;
+  }
+  .ackBox h2{
+    font-family:var(--serif);font-weight:700;
+    font-size:1.35rem;margin:0 0 12px;color:var(--ink);
+  }
+  .ackBox p{
+    margin:0 0 12px;color:var(--ink-soft);font-size:14.5px;line-height:1.55;
+  }
+  .ackBox p:last-of-type{margin-bottom:22px}
+  .ackBox strong{color:var(--ink)}
+  .ackGo{
+    background:var(--navy);color:#fff;border:none;
+    border-radius:8px;padding:11px 20px;
+    font-size:14.5px;font-weight:600;cursor:pointer;
+    width:100%;
+  }
+  .ackGo:hover{background:var(--navy-deep)}
 </style>
 </head>
 <body>
+
+<div class="ackOverlay" id="ackOverlay" role="dialog" aria-modal="true" aria-labelledby="ackTitle">
+  <div class="ackBox">
+    <h2 id="ackTitle">Confidential — Intellectual Property Notice</h2>
+    <p>All recordings, notes, and materials on this site are the <strong>intellectual property of the Indian Institute of Management Kashipur (IIM Kashipur)</strong> and are provided solely for the use of enrolled EMBA batch participants.</p>
+    <p>Do not share, redistribute, or make this content accessible to any unauthorized person.</p>
+    <button class="ackGo" id="ackGo">I Acknowledge &amp; Agree</button>
+  </div>
+</div>
 
 <div class="noticebar" id="noticebar" hidden role="status">
   <div class="notice-track" id="noticeTrack"></div>
@@ -711,6 +754,19 @@
     </span>
   </footer>
 </div>
+
+<script>
+/* IP acknowledgment gate — shown on every page load, not just once */
+(function(){
+  const overlay = document.getElementById("ackOverlay");
+  const go = document.getElementById("ackGo");
+  document.body.style.overflow = "hidden";
+  go.addEventListener("click", function(){
+    overlay.hidden = true;
+    document.body.style.overflow = "";
+  });
+})();
+</script>
 
 <script>
 /* ══════════════════════════════════════════════════════════════
