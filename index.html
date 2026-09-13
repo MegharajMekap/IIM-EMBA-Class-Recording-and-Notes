@@ -145,6 +145,12 @@
   .greetline{
     display:block;font-size:1.15em;
   }
+  .quoteline{
+    margin:10px 0 0;max-width:58ch;
+    color:var(--mute);font-size:14px;font-style:italic;
+    opacity:0;transition:opacity .6s ease;
+  }
+  .quoteline.show{opacity:1}
   .typecaret{
     display:inline-block;width:2px;height:1em;margin-left:1px;
     background:var(--mute);vertical-align:text-bottom;
@@ -999,6 +1005,7 @@
     </div>
     <h1>Executive MBA Handbook</h1>
     <p class="standfirst" id="standfirst"><span id="greetLine" class="greetline"></span><span id="restLine"></span><span id="standfirstCaret" class="typecaret"></span></p>
+    <p class="quoteline" id="quoteLine" hidden></p>
   </header>
 
   <nav class="tabs" role="tablist">
@@ -1996,13 +2003,28 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   const greetEl = document.getElementById("greetLine");
   const restEl = document.getElementById("restLine");
   const caretEl = document.getElementById("standfirstCaret");
+  const quoteEl = document.getElementById("quoteLine");
   if(!greetEl || !restEl) return;
+
+  const QUOTES = [
+    "“Leadership and learning are indispensable to each other.” — John F. Kennedy",
+    "“The purpose of learning is growth, and our minds can keep growing as long as we live.” — Mortimer Adler",
+    "“A leader is best when people barely know he exists — when his work is done, they will say: we did it ourselves.” — Lao Tzu",
+    "“Don’t sit down and wait for the opportunities to come. Get up and make them.” — Madame C.J. Walker",
+    "“The only person you are destined to become is the person you decide to be.” — Ralph Waldo Emerson",
+    "“The journey is the reward.” — Chinese Proverb",
+    "“Management is doing things right; leadership is doing the right things.” — Peter Drucker",
+    "“The best way to predict the future is to create it.” — Peter Drucker",
+    "“It is not the strongest that survive, but those most responsive to change.” — Charles Darwin",
+    "“Opportunities don’t happen. You create them.” — Chris Grosser"
+  ];
 
   function greeting(){
     const istHour = toIST(new Date()).getHours();
-    if(istHour < 12) return "Good Morning";
-    if(istHour < 17) return "Good Afternoon";
-    return "Good Evening";
+    if(istHour >= 23 || istHour < 4) return "Hello Night Owls!";
+    if(istHour < 12) return "Good Morning Folks!";
+    if(istHour < 17) return "Good Afternoon Folks!";
+    return "Good Evening Folks!";
   }
 
   const REST_TEXT = "This is your one-stop resource for the Executive MBA — class recordings, notes, events, notice, and the upcoming schedule, all in one place.";
@@ -2027,10 +2049,15 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
     greetEl.textContent = "";
     restEl.textContent = "";
     caretEl.classList.remove("done");
-    typeInto(greetEl, greeting() + " Folks!", function(){
+    typeInto(greetEl, greeting(), function(){
       typeInto(restEl, REST_TEXT, function(){
         caretEl.classList.add("done");
         typing = false;
+        if(quoteEl){
+          quoteEl.textContent = QUOTES[Math.floor(Math.random() * QUOTES.length)];
+          quoteEl.hidden = false;
+          requestAnimationFrame(function(){ quoteEl.classList.add("show"); });
+        }
       });
     });
   }
