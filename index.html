@@ -71,7 +71,8 @@
   .wrap{max-width:1060px;margin:0 auto;padding:0 24px 96px}
 
   /* ---------- masthead ---------- */
-  .masthead{padding:60px 0 30px}
+  .masthead{padding:60px 0 0}
+  .masthead-foot{padding:0 0 30px}
 
   .headrow{
     display:flex;align-items:center;justify-content:space-between;
@@ -189,12 +190,19 @@
   /* ---------- tabs ---------- */
   .tabs{
     display:flex;gap:4px;
-    background:var(--navy-tint);
+    background:rgba(238,243,250,.82);
+    -webkit-backdrop-filter:blur(10px);
+    backdrop-filter:blur(10px);
     border:1px solid #DCE6F4;
     border-radius:12px;
     padding:5px;
     margin-top:26px;
     box-shadow:inset 0 1px 2px rgba(22,35,58,.04);
+    position:sticky;top:12px;z-index:20;
+    transition:box-shadow .18s ease;
+  }
+  .tabs.is-stuck{
+    box-shadow:inset 0 1px 2px rgba(22,35,58,.04),0 10px 24px rgba(22,35,58,.14);
   }
   .tab{
     flex:1;position:relative;
@@ -581,7 +589,8 @@
   }
   @media (max-width:700px){
     .wrap{padding:0 17px 72px}
-    .masthead{padding:40px 0 24px}
+    .masthead{padding:40px 0 0}
+    .masthead-foot{padding:0 0 24px}
     .group{grid-template-columns:1fr;gap:16px;padding:26px 0}
     .rail{
       position:static;display:flex;align-items:baseline;gap:10px;
@@ -877,13 +886,15 @@
     </div>
     <h1>EMBA Handbook</h1>
     <p class="standfirst">Your one-stop resource for the Executive MBA batch — class recordings, notes, and the upcoming schedule, all in one place. Open a session to watch the recording and use the passcode listed beside the link. Campus weeks are listed too, but those sessions were taught in person and have no recording.</p>
+  </header>
 
-    <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" id="tabBtn-recordings" aria-selected="true"><svg class="tabIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z"/></svg><span class="tabLabel">Recordings</span><sup class="newflag">New</sup><span class="tabcount" id="cnt-recordings"></span></button>
-      <button class="tab" role="tab" id="tabBtn-notes" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg><span class="tabLabel">Notes</span><span class="tabcount" id="cnt-notes"></span></button>
-      <button class="tab" role="tab" id="tabBtn-calendar" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="tabLabel">Calendar</span><span class="tabcount" id="cnt-calendar"></span></button>
-    </nav>
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tabBtn-recordings" aria-selected="true"><svg class="tabIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8l6 4-6 4z"/></svg><span class="tabLabel">Recordings</span><sup class="newflag">New</sup><span class="tabcount" id="cnt-recordings"></span></button>
+    <button class="tab" role="tab" id="tabBtn-notes" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path d="M9 13h6M9 17h6"/></svg><span class="tabLabel">Notes</span><span class="tabcount" id="cnt-notes"></span></button>
+    <button class="tab" role="tab" id="tabBtn-calendar" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg><span class="tabLabel">Calendar</span><span class="tabcount" id="cnt-calendar"></span></button>
+  </nav>
 
+  <div class="masthead-foot">
     <div class="controls">
       <div class="search">
         <svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
@@ -893,7 +904,7 @@
     </div>
 
     <div class="tallyrow"><span class="tally" id="tally"></span></div>
-  </header>
+  </div>
 
   <div class="tabpanel" id="panel-recordings">
     <main id="out"></main>
@@ -1576,6 +1587,18 @@ function setTab(name){
 PANELS.forEach(p => {
   document.getElementById("tabBtn-" + p).addEventListener("click", () => setTab(p));
 });
+
+/* lift the floating tab bar with a shadow once it has stuck to the top */
+(function(){
+  const tabs = document.querySelector(".tabs");
+  if(!tabs || !("IntersectionObserver" in window)) return;
+  const sentinel = document.createElement("div");
+  tabs.parentNode.insertBefore(sentinel, tabs);
+  new IntersectionObserver(
+    ([entry]) => tabs.classList.toggle("is-stuck", !entry.isIntersecting),
+    {threshold:1}
+  ).observe(sentinel);
+})();
 
 function buildChips(){
   const names = ["All", ...new Set(sorted.map(r => r.subject))];
