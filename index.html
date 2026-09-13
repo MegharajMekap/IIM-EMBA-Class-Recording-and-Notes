@@ -191,40 +191,56 @@
 
   /* ---------- tabs ---------- */
   .tabs{
-    display:flex;
-    border-bottom:1px solid var(--line);
+    display:flex;gap:4px;
+    background:var(--navy-tint);
+    border:1px solid #DCE6F4;
+    border-radius:12px;
+    padding:5px;
     margin-top:26px;
+    box-shadow:inset 0 1px 2px rgba(22,35,58,.04);
   }
   .tab{
-    flex:1;
-    background:none;border:none;cursor:pointer;
-    padding:10px 1px;margin-bottom:-1px;
+    flex:1;position:relative;
+    background:none;border:none;border-radius:8px;cursor:pointer;
+    padding:11px 8px;
     font-size:14.5px;font-weight:600;color:var(--mute);
-    border-bottom:2px solid transparent;
     display:inline-flex;align-items:center;justify-content:center;
+    transition:background .18s ease,color .18s ease,box-shadow .18s ease;
   }
-  .tab:hover{color:var(--ink-soft)}
-  .tab[aria-selected="true"]{color:var(--navy);border-bottom-color:var(--navy)}
+  .tab:hover{color:var(--ink-soft);background:rgba(255,255,255,.6)}
+  .tab[aria-selected="true"]{
+    color:#fff;background:var(--navy);
+    box-shadow:0 2px 7px rgba(18,53,104,.32);
+  }
+  .tab[aria-selected="true"]:hover{background:var(--navy)}
   .tabcount{
     display:inline-flex;align-items:center;justify-content:center;
     min-width:20px;height:20px;padding:0 6px;margin-left:8px;
-    border-radius:10px;background:var(--navy-tint);color:var(--navy);
+    border-radius:10px;background:#fff;color:var(--navy);
     font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;
   }
-  .tab[aria-selected="true"] .tabcount{background:var(--navy);color:#fff}
+  .tab[aria-selected="true"] .tabcount{background:rgba(255,255,255,.24);color:#fff}
   .tabIcon{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;margin-right:7px;flex:none}
   .tabpanel[hidden]{display:none}
   .newflag{
     font-size:9.5px;font-weight:700;letter-spacing:.03em;
-    color:#C2410C;margin-left:5px;
+    color:#C2410C;background:rgba(194,65,12,.12);
+    border-radius:4px;padding:1px 5px;margin-left:5px;
+    vertical-align:middle;
     animation:newFlash 1.2s ease-in-out infinite;
   }
+  .tab[aria-selected="true"] .newflag{color:#fff;background:rgba(255,255,255,.24)}
   @keyframes newFlash{
     0%,100%{opacity:1}
-    50%{opacity:.25}
+    50%{opacity:.4}
   }
   @media (prefers-reduced-motion:reduce){
     .newflag{animation:none}
+    .tab{transition:none}
+  }
+  @media (max-width:520px){
+    .tab{font-size:13px;padding:10px 4px}
+    .tabcount{min-width:18px;height:18px;font-size:11px;margin-left:6px}
   }
 
   /* ---------- featured ---------- */
