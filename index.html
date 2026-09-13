@@ -300,6 +300,14 @@
     color:#C2410C;background:rgba(194,65,12,.12);
     border-radius:4px;padding:1px 5px;margin-left:5px;
     vertical-align:middle;
+    animation:newFlash 0.9s ease-in-out 33.34;
+  }
+  @keyframes newFlash{
+    0%,100%{opacity:1}
+    50%{opacity:.35}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .newflag{animation:none!important}
   }
   .tab[aria-selected="true"] .newflag{color:#fff;background:rgba(255,255,255,.24)}
   @media (max-width:520px){
@@ -2093,6 +2101,13 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").catch(function(){});
   }
+})();
+
+/* ── recordings tab "New" badge: flash for 30s, then remove ── */
+(function(){
+  const flag = document.querySelector(".tab .newflag");
+  if(!flag) return;
+  setTimeout(function(){ flag.remove(); }, 30000);
 })();
 
 /* ── manual refresh button (shown in every view — browser tab or installed PWA) ── */
