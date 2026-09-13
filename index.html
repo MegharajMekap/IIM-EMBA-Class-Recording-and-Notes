@@ -153,9 +153,7 @@
   /* ---------- controls ---------- */
   .controls{
     display:flex;flex-wrap:wrap;gap:12px;align-items:center;
-    padding:24px 0 10px;
-    border-top:1px solid var(--line);
-    margin-top:34px;
+    padding:20px 0 10px;
   }
   .search{position:relative;flex:1 1 250px;min-width:210px}
   .search svg{
@@ -199,16 +197,17 @@
 
   /* ---------- tabs ---------- */
   .tabs{
-    display:flex;gap:26px;
+    display:flex;
     border-bottom:1px solid var(--line);
     margin-top:26px;
   }
   .tab{
+    flex:1;
     background:none;border:none;cursor:pointer;
     padding:10px 1px;margin-bottom:-1px;
     font-size:14.5px;font-weight:600;color:var(--mute);
     border-bottom:2px solid transparent;
-    display:inline-flex;align-items:center;
+    display:inline-flex;align-items:center;justify-content:center;
   }
   .tab:hover{color:var(--ink-soft)}
   .tab[aria-selected="true"]{color:var(--navy);border-bottom-color:var(--navy)}
@@ -417,9 +416,9 @@
   }
 
   /* ---------- class notes ---------- */
-  .notes{margin-top:54px;border-top:1px solid var(--line);padding-top:36px;scroll-margin-top:20px}
+  .notes{margin-top:6px;scroll-margin-top:20px}
   .nhead{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px}
-  .notes h2{
+  .notes h2, .timetable h2{
     font-family:var(--serif);font-weight:700;
     font-size:clamp(1.7rem,4vw,2.15rem);letter-spacing:-.02em;margin:0;
   }
@@ -470,7 +469,7 @@
   }
 
   /* ---------- calendar ---------- */
-  .timetable{margin-top:54px;border-top:1px solid var(--line);padding-top:36px;scroll-margin-top:20px}
+  .timetable{margin-top:6px;scroll-margin-top:20px}
   .caltable{
     width:100%;border-collapse:collapse;
     background:var(--card);border:1px solid var(--line);
@@ -664,6 +663,12 @@
     <h1>EMBA Handbook</h1>
     <p class="standfirst">Your one-stop resource for the Executive MBA batch — class recordings, notes, and the upcoming schedule, all in one place. Open a session to watch the recording and use the passcode listed beside the link. Campus weeks are listed too, but those sessions were taught in person and have no recording.</p>
 
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabBtn-recordings" data-panel="recordings" aria-selected="true">Recordings<sup class="newflag">NEW</sup><span class="tabcount" id="cnt-recordings"></span></button>
+      <button class="tab" role="tab" id="tabBtn-notes" data-panel="notes" aria-selected="false">Notes<span class="tabcount" id="cnt-notes"></span></button>
+      <button class="tab" role="tab" id="tabBtn-calendar" data-panel="calendar" aria-selected="false">Calendar<span class="tabcount" id="cnt-calendar"></span></button>
+    </nav>
+
     <div class="controls">
       <div class="search">
         <svg viewBox="0 0 24 24" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>
@@ -671,12 +676,6 @@
       </div>
       <div class="chips" id="chips" role="group" aria-label="Filter by subject"></div>
     </div>
-
-    <nav class="tabs" role="tablist">
-      <button class="tab" role="tab" id="tabBtn-recordings" data-panel="recordings" aria-selected="true">Recordings<sup class="newflag">NEW</sup><span class="tabcount" id="cnt-recordings"></span></button>
-      <button class="tab" role="tab" id="tabBtn-notes" data-panel="notes" aria-selected="false">Notes<span class="tabcount" id="cnt-notes"></span></button>
-      <button class="tab" role="tab" id="tabBtn-calendar" data-panel="calendar" aria-selected="false">Calendar<span class="tabcount" id="cnt-calendar"></span></button>
-    </nav>
 
     <div class="tallyrow"><span class="tally" id="tally"></span></div>
   </header>
