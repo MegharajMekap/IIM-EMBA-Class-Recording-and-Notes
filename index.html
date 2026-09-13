@@ -172,8 +172,30 @@
     justify-content:space-between;padding:14px 0 0;
   }
   .tally{font-size:14px;color:var(--mute)}
-  .jump{font-size:13.5px;font-weight:600;color:var(--navy);text-decoration:none}
-  .jump:hover{text-decoration:underline}
+
+  /* ---------- tabs ---------- */
+  .tabs{
+    display:flex;gap:26px;
+    border-bottom:1px solid var(--line);
+    margin-top:26px;
+  }
+  .tab{
+    background:none;border:none;cursor:pointer;
+    padding:10px 1px;margin-bottom:-1px;
+    font-size:14.5px;font-weight:600;color:var(--mute);
+    border-bottom:2px solid transparent;
+    display:inline-flex;align-items:center;
+  }
+  .tab:hover{color:var(--ink-soft)}
+  .tab[aria-selected="true"]{color:var(--navy);border-bottom-color:var(--navy)}
+  .tabcount{
+    display:inline-flex;align-items:center;justify-content:center;
+    min-width:20px;height:20px;padding:0 6px;margin-left:8px;
+    border-radius:10px;background:var(--navy-tint);color:var(--navy);
+    font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;
+  }
+  .tab[aria-selected="true"] .tabcount{background:var(--navy);color:#fff}
+  .tabpanel[hidden]{display:none}
 
   /* ---------- featured ---------- */
   .featured{
@@ -411,6 +433,29 @@
     .nkind{order:0}
   }
 
+  /* ---------- calendar ---------- */
+  .timetable{margin-top:54px;border-top:1px solid var(--line);padding-top:36px;scroll-margin-top:20px}
+  .caltable{
+    width:100%;border-collapse:collapse;
+    background:var(--card);border:1px solid var(--line);
+    border-radius:11px;overflow:hidden;box-shadow:var(--lift);
+    font-size:14px;
+  }
+  .caltable th{
+    text-align:left;font-size:12.5px;font-weight:600;color:var(--mute);
+    padding:11px 14px;border-bottom:1px solid var(--line);
+    background:var(--navy-tint);
+  }
+  .caltable td{padding:11px 14px;border-top:1px solid var(--line-soft);vertical-align:middle}
+  .caltable tr:first-child td{border-top:none}
+  .caltable a{color:var(--navy);font-weight:600;text-decoration:none}
+  .caltable a:hover{text-decoration:underline}
+  .calBtn{
+    background:var(--card);border:1px solid var(--line);border-radius:7px;
+    padding:7px 12px;font-size:13px;font-weight:600;color:var(--ink-soft);cursor:pointer;
+  }
+  .calBtn:hover{border-color:var(--navy);color:var(--navy)}
+
   footer{
     border-top:1px solid var(--line);
     margin-top:52px;padding-top:22px;
@@ -550,8 +595,8 @@
     </div>
 
     <div class="term" id="termLabel">Batch 2026 · Term 1 Phase 2 in progress</div>
-    <h1>Class recordings and notes</h1>
-    <p class="standfirst">Every scheduled class, newest first. Open a session to watch the recording and use the passcode listed beside the link. Campus weeks are listed too, but those sessions were taught in person and have no recording.</p>
+    <h1>EMBA Handbook</h1>
+    <p class="standfirst">Your one-stop resource for the Executive MBA batch — class recordings, notes, and the upcoming schedule, all in one place. Open a session to watch the recording and use the passcode listed beside the link. Campus weeks are listed too, but those sessions were taught in person and have no recording.</p>
 
     <div class="controls">
       <div class="search">
@@ -560,18 +605,39 @@
       </div>
       <div class="chips" id="chips" role="group" aria-label="Filter by subject"></div>
     </div>
-    <div class="tallyrow"><span class="tally" id="tally"></span><a class="jump" href="#notes">Jump to class notes</a></div>
+
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabBtn-recordings" data-panel="recordings" aria-selected="true">Recordings<span class="tabcount" id="cnt-recordings"></span></button>
+      <button class="tab" role="tab" id="tabBtn-notes" data-panel="notes" aria-selected="false">Notes<span class="tabcount" id="cnt-notes"></span></button>
+      <button class="tab" role="tab" id="tabBtn-calendar" data-panel="calendar" aria-selected="false">Calendar<span class="tabcount" id="cnt-calendar"></span></button>
+    </nav>
+
+    <div class="tallyrow"><span class="tally" id="tally"></span></div>
   </header>
 
-  <main id="out"></main>
+  <div class="tabpanel" id="panel-recordings" data-panel="recordings">
+    <main id="out"></main>
+  </div>
 
-  <section class="notes" id="notes">
-    <div class="nhead">
-      <h2>Class notes</h2>
-      <span class="ntally" id="ntally"></span>
-    </div>
-    <div id="notesOut"></div>
-  </section>
+  <div class="tabpanel" id="panel-notes" data-panel="notes" hidden>
+    <section class="notes" id="notes">
+      <div class="nhead">
+        <h2>Class notes</h2>
+        <span class="ntally" id="ntally"></span>
+      </div>
+      <div id="notesOut"></div>
+    </section>
+  </div>
+
+  <div class="tabpanel" id="panel-calendar" data-panel="calendar" hidden>
+    <section class="timetable" id="timetable">
+      <div class="nhead">
+        <h2>Calendar</h2>
+        <span class="ntally" id="caltally"></span>
+      </div>
+      <div id="calOut"></div>
+    </section>
+  </div>
 
   <footer>
     <span id="footNote"></span>
@@ -972,6 +1038,7 @@ function render(){
       '<button class="reset" id="reset">Show everything</button></div>';
     tally.textContent = "0 of " + sorted.length + " recordings";
     renderNotes();
+    renderCalendar();
     return;
   }
 
@@ -990,12 +1057,130 @@ function render(){
   if(!held.length) html += '<div class="empty"><h3>No classes held yet</h3><p>Sessions will appear here once the first class is recorded.</p></div>';
   out.innerHTML = html;
   renderNotes();
+  renderCalendar();
 
   const withLink = held.filter(r => !r.campus && !isPending(r)).length;
   tally.textContent = filtering
     ? list.length + " of " + sorted.length + " classes"
     : sorted.length + " classes scheduled · " + held.length + " held so far · " + withLink + " recordings linked";
 }
+
+/* ── calendar tab ── */
+const calOut = document.getElementById("calOut");
+const caltally = document.getElementById("caltally");
+const cntRecordings = document.getElementById("cnt-recordings");
+const cntNotes = document.getElementById("cnt-notes");
+const cntCalendar = document.getElementById("cnt-calendar");
+
+const endStamp = r => new Date(r.date + "T" + to24(r.ends || r.time)).getTime();
+const upcomingSorted = () => RECORDINGS.filter(r => endStamp(r) > Date.now()).sort((a,b) => stamp(a) - stamp(b));
+const pad2 = n => String(n).padStart(2, "0");
+
+function icsStamp(d){
+  return d.getUTCFullYear() + pad2(d.getUTCMonth()+1) + pad2(d.getUTCDate()) + "T" +
+    pad2(d.getUTCHours()) + pad2(d.getUTCMinutes()) + pad2(d.getUTCSeconds()) + "Z";
+}
+const icsEscape = s => String(s).replace(/([,;])/g, "\\$1").replace(/\n/g, "\\n");
+
+function downloadICS(r){
+  const start = new Date(r.date + "T" + to24(r.time) + "+05:30");
+  const end = new Date(r.date + "T" + to24(r.ends || r.time) + "+05:30");
+  const title = r.subject + " — " + r.lecture;
+  const linkLine = r.campus ? "On-campus session" : (r.url ? r.url : "Link to be shared closer to the date");
+  const desc = (r.faculty ? r.faculty + "\n" : "") + linkLine;
+  const loc = r.campus ? "IIM Kashipur Campus" : (r.url || "");
+  const ics = [
+    "BEGIN:VCALENDAR","VERSION:2.0","PRODID:-//EMBA Handbook//EN","BEGIN:VEVENT",
+    "UID:" + (r.date + r.time + r.subject).replace(/\W/g,"") + "@emba-handbook",
+    "DTSTAMP:" + icsStamp(new Date()),
+    "DTSTART:" + icsStamp(start),
+    "DTEND:" + icsStamp(end),
+    "SUMMARY:" + icsEscape(title),
+    "DESCRIPTION:" + icsEscape(desc),
+    "LOCATION:" + icsEscape(loc),
+    "END:VEVENT","END:VCALENDAR"
+  ].join("\r\n");
+  const blob = new Blob([ics], { type:"text/calendar" });
+  const href = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = href;
+  a.download = title.replace(/[^\w\- ]/g,"") + ".ics";
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(href);
+}
+
+function calLinkCell(r){
+  if(r.campus) return "—";
+  if(isPending(r)){
+    const code = sub(r.subject).code;
+    const expired = code === "BS" || code === "MM1" || code === "MM2";
+    return expired ? "Video expired" : "Link pending";
+  }
+  return '<a href="' + esc(r.url) + '" target="_blank" rel="noopener">Open link</a>';
+}
+
+function calRow(r){
+  const s = sub(r.subject);
+  const d = d0(r.date);
+  return '<tr>' +
+    '<td>' + DOW[d.getDay()].slice(0,3) + ' ' + d.getDate() + ' ' + MON[d.getMonth()].slice(0,3) + '</td>' +
+    '<td><span style="color:' + s.color + ';font-weight:600">' + esc(r.subject) + '</span></td>' +
+    '<td>' + esc(r.lecture) + '</td>' +
+    '<td>' + slot(r) + '</td>' +
+    '<td>' + calLinkCell(r) + '</td>' +
+    '<td><button class="calBtn" data-ics="' + RECORDINGS.indexOf(r) + '">+ Calendar</button></td>' +
+  '</tr>';
+}
+
+function renderCalendar(){
+  const q = qBox.value.trim().toLowerCase();
+  const upcomingAll = upcomingSorted();
+  cntCalendar.textContent = upcomingAll.length;
+
+  const filtering = q !== "" || active !== "All";
+  const list = upcomingAll.filter(r => {
+    if(active !== "All" && r.subject !== active) return false;
+    if(!q) return true;
+    return [r.lecture, r.subject, sub(r.subject).code, r.faculty, r.term, r.date].join(" ").toLowerCase().indexOf(q) > -1;
+  });
+
+  if(!upcomingAll.length){
+    calOut.innerHTML = '<div class="empty"><h3>No classes left on the schedule</h3><p>Check back once the next term is added.</p></div>';
+    caltally.textContent = "0 upcoming classes";
+    return;
+  }
+  if(!list.length){
+    calOut.innerHTML = '<div class="empty"><h3>Nothing matches that yet</h3>' +
+      '<p>Try a different subject, or clear the search to see all ' + upcomingAll.length + ' upcoming classes.</p>' +
+      '<button class="reset" id="calReset">Show everything</button></div>';
+    caltally.textContent = "0 of " + upcomingAll.length + " upcoming classes";
+    return;
+  }
+
+  calOut.innerHTML = '<div style="overflow-x:auto"><table class="caltable"><thead><tr>' +
+    '<th>Date</th><th>Subject</th><th>Session</th><th>Time</th><th>Link</th><th>Add</th>' +
+    '</tr></thead><tbody>' + list.map(calRow).join("") + '</tbody></table></div>';
+
+  caltally.textContent = filtering
+    ? list.length + " of " + upcomingAll.length + " upcoming classes"
+    : upcomingAll.length + " upcoming classes";
+}
+
+/* ── tabs ── */
+const PANELS = ["recordings", "notes", "calendar"];
+function setTab(name){
+  if(PANELS.indexOf(name) === -1) name = "recordings";
+  PANELS.forEach(p => {
+    document.getElementById("panel-" + p).hidden = p !== name;
+    document.getElementById("tabBtn-" + p).setAttribute("aria-selected", p === name);
+  });
+  tally.style.display = name === "recordings" ? "" : "none";
+  const hash = name === "recordings" ? "" : "#" + name;
+  if(location.hash !== hash) history.replaceState(null, "", location.pathname + location.search + hash);
+}
+PANELS.forEach(p => {
+  document.getElementById("tabBtn-" + p).addEventListener("click", () => setTab(p));
+});
 
 function buildChips(){
   const names = ["All", ...new Set(sorted.map(r => r.subject))];
@@ -1056,11 +1241,17 @@ document.addEventListener("click", e => {
     setTimeout(() => { p.textContent = old; p.classList.remove("done"); }, 1400);
     return;
   }
-  if(e.target.id === "reset"){
+  if(e.target.id === "reset" || e.target.id === "calReset"){
     qBox.value = "";
     active = "All";
     buildChips();
     render();
+    return;
+  }
+  const icsBtn = e.target.closest(".calBtn");
+  if(icsBtn){
+    downloadICS(RECORDINGS[+icsBtn.dataset.ics]);
+    return;
   }
 });
 
@@ -1079,6 +1270,9 @@ document.getElementById("footNote").textContent =
 
 buildChips();
 render();
+cntRecordings.textContent = sorted.length;
+cntNotes.textContent = NOTES.length;
+setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.hash.slice(1) : "recordings");
 
 /* ── add to home screen ── */
 (function(){
