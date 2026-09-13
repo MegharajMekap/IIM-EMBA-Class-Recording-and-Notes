@@ -469,16 +469,52 @@
 
   /* ---------- calendar ---------- */
   .timetable{margin-top:6px;scroll-margin-top:20px}
+  .calLegend{font-size:12.5px;color:var(--mute);margin:0 0 16px}
+  .calMonth{margin-bottom:30px}
+  .calMonth:last-child{margin-bottom:0}
+  .calMonthCard{
+    border-radius:11px;overflow:hidden;box-shadow:var(--lift);border:1px solid var(--line);
+  }
+  .calMonthHeader{
+    background:#D64536;color:#fff;padding:11px 16px;
+    font-weight:700;font-size:14.5px;
+  }
+  .calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--line)}
+  .calDow{
+    background:var(--navy-tint);color:var(--navy);text-align:center;
+    font-size:11px;font-weight:700;letter-spacing:.02em;padding:6px 2px;
+  }
+  .calCell{background:var(--card);min-height:92px;padding:6px 5px;display:flex;flex-direction:column;gap:4px}
+  .calCell-blank{background:var(--navy-tint)}
+  .calDayNum{font-size:12px;font-weight:700;color:var(--ink-soft)}
+  .calToday{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:20px;height:20px;border-radius:50%;background:var(--navy);color:#fff;
+  }
+  .calChips{display:flex;flex-direction:column;gap:3px;overflow:hidden}
+  .calChip{
+    display:flex;align-items:center;gap:4px;border-radius:5px;
+    padding:2px 5px;color:#fff;font-size:10px;font-weight:600;line-height:1.35;
+  }
+  .calChip-link{cursor:pointer}
+  .calChipText{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0}
+  .calChipTime{font-weight:500;opacity:.85;margin-left:3px}
+  .calChipAdd{
+    flex:none;background:rgba(255,255,255,.28);border:none;color:#fff;
+    border-radius:4px;width:14px;height:14px;font-size:10.5px;line-height:1;padding:0;
+    cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .calChipAdd:hover{background:rgba(255,255,255,.5)}
   .caltable{
     width:100%;border-collapse:collapse;
     background:var(--card);border:1px solid var(--line);
     border-radius:11px;overflow:hidden;box-shadow:var(--lift);
-    font-size:14px;
+    font-size:14px;margin-top:14px;
   }
   .caltable th{
-    text-align:left;font-size:12.5px;font-weight:600;color:var(--mute);
+    text-align:left;font-size:12.5px;font-weight:600;color:#fff;
     padding:11px 14px;border-bottom:1px solid var(--line);
-    background:var(--navy-tint);
+    background:var(--navy);
   }
   .caltable td{padding:11px 14px;border-top:1px solid var(--line-soft);vertical-align:middle}
   .caltable tr:first-child td{border-top:none}
@@ -515,6 +551,11 @@
     .rail .cnt{border:none;padding:0;margin:0 0 0 auto}
     .card{grid-template-columns:1fr;gap:13px}
     .cbody{padding:0 4px 6px}
+    .calCell{padding:3px 2px;min-height:50px}
+    .calDayNum{font-size:10.5px}
+    .calDow{font-size:9.5px;padding:4px 2px}
+    .calChip{padding:2px 3px}
+    .calChipTime{display:none}
   }
 
 
@@ -1244,6 +1285,69 @@ function calRow(r){
   '</tr>';
 }
 
+function groupByMonth(list){
+  const map = new Map();
+  list.forEach(r => {
+    const d = d0(r.date);
+    const key = d.getFullYear() + "-" + d.getMonth();
+    if(!map.has(key)) map.set(key, { year:d.getFullYear(), month:d.getMonth(), items:[] });
+    map.get(key).items.push(r);
+  });
+  return [...map.values()];
+}
+
+function calChip(r){
+  const s = sub(r.subject);
+  const idx = RECORDINGS.indexOf(r);
+  const playable = !r.campus && !isPending(r) && !!r.url;
+  const statusText = r.campus ? "Offline class" : (isPending(r) ? calLinkCell(r).replace(/<[^>]+>/g,"") : "");
+  const tip = r.subject + " — " + r.lecture + "\n" + slot(r) + (r.faculty ? "\n" + r.faculty : "") + (statusText ? "\n" + statusText : "");
+  return '<div class="calChip' + (playable ? ' calChip-link' : '') + '" style="background:' + s.color + '"' +
+    ' title="' + esc(tip) + '"' + (playable ? ' data-url="' + esc(r.url) + '"' : '') + '>' +
+    '<span class="calChipText">' + esc(s.code) + ' · ' + esc(r.lecture) + ' <span class="calChipTime">' + esc(r.time || "") + '</span></span>' +
+    '<button class="calChipAdd calBtn" data-ics="' + idx + '" aria-label="Add to calendar" title="Add to calendar">+</button>' +
+  '</div>';
+}
+
+function calMonthGrid(year, month, items){
+  const first = new Date(year, month, 1);
+  const startDow = first.getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const byDay = new Map();
+  items.forEach(r => {
+    const day = d0(r.date).getDate();
+    if(!byDay.has(day)) byDay.set(day, []);
+    byDay.get(day).push(r);
+  });
+  const today = new Date(); today.setHours(0,0,0,0);
+  let cells = DOW.map(d => '<div class="calDow">' + d.slice(0,3) + '</div>').join("");
+  for(let i=0;i<startDow;i++) cells += '<div class="calCell calCell-blank"></div>';
+  for(let day=1; day<=daysInMonth; day++){
+    const isToday = new Date(year, month, day).getTime() === today.getTime();
+    const dayItems = (byDay.get(day) || []).slice().sort((a,b) => stamp(a) - stamp(b));
+    cells += '<div class="calCell">' +
+      '<span class="calDayNum' + (isToday ? ' calToday' : '') + '">' + day + '</span>' +
+      '<div class="calChips">' + dayItems.map(calChip).join("") + '</div>' +
+    '</div>';
+  }
+  const trailing = (7 - ((startDow + daysInMonth) % 7)) % 7;
+  for(let i=0;i<trailing;i++) cells += '<div class="calCell calCell-blank"></div>';
+  return '<div class="calGrid">' + cells + '</div>';
+}
+
+function calMonthBlock(g){
+  const label = MON[g.month] + " " + g.year;
+  return '<div class="calMonth">' +
+    '<div class="calMonthCard">' +
+      '<div class="calMonthHeader">' + label + ' · ' + g.items.length + ' class' + (g.items.length > 1 ? "es" : "") + '</div>' +
+      calMonthGrid(g.year, g.month, g.items) +
+    '</div>' +
+    '<div style="overflow-x:auto"><table class="caltable"><thead><tr>' +
+      '<th>Date</th><th>Subject</th><th>Session</th><th>Time</th><th>Link</th><th>Add</th>' +
+    '</tr></thead><tbody>' + g.items.map(calRow).join("") + '</tbody></table></div>' +
+  '</div>';
+}
+
 function renderCalendar(){
   const q = qBox.value.trim().toLowerCase();
   const upcomingAll = upcomingSorted();
@@ -1269,9 +1373,9 @@ function renderCalendar(){
     return;
   }
 
-  calOut.innerHTML = '<div style="overflow-x:auto"><table class="caltable"><thead><tr>' +
-    '<th>Date</th><th>Subject</th><th>Session</th><th>Time</th><th>Link</th><th>Add</th>' +
-    '</tr></thead><tbody>' + list.map(calRow).join("") + '</tbody></table></div>';
+  const months = groupByMonth(list);
+  calOut.innerHTML = '<p class="calLegend">Tap a class or its “Open link” to view the recording · tap + to add it to your own calendar.</p>' +
+    months.map(calMonthBlock).join("");
 
   caltally.textContent = filtering
     ? list.length + " of " + upcomingAll.length + " upcoming classes"
@@ -1363,6 +1467,11 @@ document.addEventListener("click", e => {
   const icsBtn = e.target.closest(".calBtn");
   if(icsBtn){
     downloadICS(RECORDINGS[+icsBtn.dataset.ics]);
+    return;
+  }
+  const chipLink = e.target.closest(".calChip-link");
+  if(chipLink && chipLink.dataset.url){
+    window.open(chipLink.dataset.url, "_blank", "noopener");
     return;
   }
 });
