@@ -140,7 +140,18 @@
   .standfirst{
     margin:0;max-width:58ch;
     color:var(--mute);font-size:16.5px;
+    white-space:pre-line;
   }
+  .greetline{
+    display:block;font-size:1.15em;
+  }
+  .typecaret{
+    display:inline-block;width:2px;height:1em;margin-left:1px;
+    background:var(--mute);vertical-align:text-bottom;
+    animation:caretblink 0.8s step-end infinite;
+  }
+  .typecaret.done{animation:none;opacity:0;}
+  @keyframes caretblink{0%,100%{opacity:1;}50%{opacity:0;}}
 
   /* ---------- controls ---------- */
   .controls{
@@ -982,8 +993,8 @@
       <div class="term" id="termLabel">Batch 2026 · Term 1 Phase 2 <span class="live">in progress</span></div>
       <div class="clock" id="liveClock"></div>
     </div>
-    <h1>EMBA Handbook</h1>
-    <p class="standfirst">Your one-stop resource for the Executive MBA batch — class recordings, notes, and the upcoming schedule, all in one place. Open a session to watch the recording and use the passcode listed beside the link. Campus weeks are listed too, but those sessions were taught in person and have no recording.</p>
+    <h1>Executive MBA Handbook</h1>
+    <p class="standfirst" id="standfirst"><span id="greetLine" class="greetline"></span><span id="restLine"></span><span id="standfirstCaret" class="typecaret"></span></p>
   </header>
 
   <nav class="tabs" role="tablist">
@@ -1051,6 +1062,7 @@
     setTimeout(function(){
       overlay.hidden = true;
       document.body.style.overflow = "";
+      if(typeof window.playStandfirstTyping === "function") window.playStandfirstTyping();
     }, 650);
   });
 })();
@@ -1954,6 +1966,55 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
     tick();
     if(!document.getElementById("panel-calendar").hidden) renderCalendar();
   }, 20000);
+})();
+
+/* ── greeting (IST) + typewriter animation on each visit ── */
+(function(){
+  const greetEl = document.getElementById("greetLine");
+  const restEl = document.getElementById("restLine");
+  const caretEl = document.getElementById("standfirstCaret");
+  if(!greetEl || !restEl) return;
+
+  function greeting(){
+    const istHour = Number(new Intl.DateTimeFormat("en-US", {
+      timeZone: "Asia/Kolkata", hour: "numeric", hour12: false
+    }).format(new Date()));
+    if(istHour < 12) return "Good Morning";
+    if(istHour < 17) return "Good Afternoon";
+    return "Good Evening";
+  }
+
+  const REST_TEXT = "This is your one-stop resource for the Executive MBA — class recordings, notes, events, notice, and the upcoming schedule, all in one place.";
+
+  let typing = false;
+  function typeInto(el, str, done){
+    let i = 0;
+    (function step(){
+      if(i <= str.length){
+        el.textContent = str.slice(0, i);
+        i++;
+        setTimeout(step, 18);
+      } else {
+        done();
+      }
+    })();
+  }
+
+  function type(){
+    if(typing) return;
+    typing = true;
+    greetEl.textContent = "";
+    restEl.textContent = "";
+    caretEl.classList.remove("done");
+    typeInto(greetEl, greeting() + " Folks!", function(){
+      typeInto(restEl, REST_TEXT, function(){
+        caretEl.classList.add("done");
+        typing = false;
+      });
+    });
+  }
+
+  window.playStandfirstTyping = type;
 })();
 
 /* ── live clock ── */
