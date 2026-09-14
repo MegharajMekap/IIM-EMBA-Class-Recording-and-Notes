@@ -1749,6 +1749,19 @@ PANELS.forEach(p => {
   document.getElementById("tabBtn-" + p).addEventListener("click", () => setTab(p));
 });
 
+/* left/right arrow keys switch tabs too, unless the user is typing somewhere */
+document.addEventListener("keydown", e => {
+  if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+  if(e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+  const t = e.target;
+  if(t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+  const current = document.querySelector('.tab[aria-selected="true"]');
+  const i = current ? PANELS.indexOf(current.id.replace("tabBtn-", "")) : -1;
+  if(i === -1) return;
+  const next = i + (e.key === "ArrowRight" ? 1 : -1);
+  if(next >= 0 && next < PANELS.length) setTab(PANELS[next]);
+});
+
 /* swipe left/right anywhere on the page to switch tabs, touch devices only */
 (function(){
   const MIN_DIST = 60, MAX_TIME = 600, MAX_OFF_AXIS = 60; // px, px, ms
