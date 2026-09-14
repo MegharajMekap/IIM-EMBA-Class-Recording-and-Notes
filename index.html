@@ -709,16 +709,6 @@
   .calBtn svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
   .calChipAdd svg{width:9px;height:9px}
   .calSubjCode{display:none}
-  @media (max-width:520px){
-    .caltable th:nth-child(3),
-    .caltable td:nth-child(3){display:none}
-    .caltable .calSubjFull{display:none}
-    .caltable .calSubjCode{
-      display:inline-block;font-weight:700;border:1px solid;
-      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-      font-size:11.5px;padding:3px 8px;border-radius:20px;
-    }
-  }
 
   footer{
     border-top:1px solid var(--line);
@@ -746,12 +736,25 @@
     .rail .cnt{border:none;padding:0;margin:0 0 0 auto}
     .card{grid-template-columns:1fr;gap:13px}
     .cbody{padding:0 4px 6px}
-    .calCell{padding:3px 2px;min-height:50px}
+    .calCell{padding:4px 3px;min-height:54px;gap:3px}
     .calDayNum{font-size:10.5px}
     .calDow{font-size:9.5px;padding:4px 2px}
-    .calChip{padding:2px 3px}
+    .calChip{padding:2.5px 4px;border-radius:5px;line-height:1.3}
+    .calChip:active{transform:scale(.96)}
+    .calChipAdd{width:16px;height:16px;position:relative}
+    .calChipAdd::before{content:"";position:absolute;inset:-5px}
+    .calChipAdd svg{width:10px;height:10px}
     .calChipTime{display:none}
+    .calChipLecture{display:none}
     .calTodayFlag{font-size:.7rem}
+    .caltable th:nth-child(3),
+    .caltable td:nth-child(3){display:none}
+    .caltable .calSubjFull{display:none}
+    .caltable .calSubjCode{
+      display:inline-block;font-weight:700;border:1px solid;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      font-size:11.5px;padding:3px 8px;border-radius:20px;
+    }
   }
 
 
@@ -1629,7 +1632,7 @@ function calChip(r){
   return '<div class="calChip' + (playable ? ' calChip-link' : '') + (live ? ' calChip-live' : '') + '" style="background:' + s.color + '"' +
     ' title="' + esc(tip) + '"' + (playable ? ' data-url="' + esc(r.url) + '"' : '') + '>' +
     (live ? '<span class="calChipDot" aria-hidden="true"></span>' : '') +
-    '<span class="calChipText">' + esc(s.code) + ' · ' + esc(r.lecture) + ' <span class="calChipTime">' + esc(r.time || "") + '</span></span>' +
+    '<span class="calChipText">' + esc(s.code) + '<span class="calChipLecture"> · ' + esc(r.lecture) + '</span> <span class="calChipTime">' + esc(r.time || "") + '</span></span>' +
     '<a class="calChipAdd calBtn" href="' + esc(googleCalUrl(r)) + '" target="_blank" rel="noopener" aria-label="Add to Google Calendar" title="Add to Google Calendar">+</a>' +
   '</div>';
 }
@@ -1638,7 +1641,7 @@ function calChipDone(r){
   const s = sub(r.subject);
   const tip = r.subject + " — " + r.lecture + "\n" + slot(r) + (r.faculty ? "\n" + r.faculty : "") + "\nCompleted · tap to view in Recordings";
   return '<div class="calChip calChip-done" data-recid="' + esc(recId(r)) + '" title="' + esc(tip) + '">' +
-    '<span class="calChipText">' + esc(s.code) + ' · ' + esc(r.lecture) + '</span>' +
+    '<span class="calChipText">' + esc(s.code) + '<span class="calChipLecture"> · ' + esc(r.lecture) + '</span></span>' +
   '</div>';
 }
 
