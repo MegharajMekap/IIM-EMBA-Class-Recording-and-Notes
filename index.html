@@ -976,6 +976,7 @@
     backdrop-filter:blur(8px) saturate(1.3);-webkit-backdrop-filter:blur(8px) saturate(1.3);
     display:flex;align-items:center;justify-content:center;
     padding:20px;
+    touch-action:none;overscroll-behavior:contain;
     animation:noticeOverlayIn .25s ease;
   }
   .noticeOverlay[hidden]{display:none}
@@ -1918,6 +1919,7 @@ function renderCalendar(){
 
 /* ── tabs ── */
 const PANELS = ["recordings", "notes", "calendar"];
+let noticeModalOpen = false; // blocks tab keys/swipes and page scroll while the notice modal is up
 function setTab(name, userAction){
   if(PANELS.indexOf(name) === -1) name = "recordings";
   PANELS.forEach(p => {
@@ -1958,6 +1960,7 @@ window.addEventListener("resize", () => moveTabIndicator(true));
 document.addEventListener("keydown", e => {
   if(e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
   if(e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+  if(noticeModalOpen) return;
   const t = e.target;
   if(t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
   const current = document.querySelector('.tab[aria-selected="true"]');
@@ -1982,7 +1985,7 @@ document.addEventListener("keydown", e => {
   }
 
   document.addEventListener("touchstart", e => {
-    tracking = e.touches.length === 1 && !scrollsHorizontally(e.target);
+    tracking = !noticeModalOpen && e.touches.length === 1 && !scrollsHorizontally(e.target);
     if(!tracking) return;
     startX = e.touches[0].clientX;
     startY = e.touches[0].clientY;
@@ -1992,6 +1995,7 @@ document.addEventListener("keydown", e => {
   document.addEventListener("touchend", e => {
     if(!tracking) return;
     tracking = false;
+    if(noticeModalOpen) return;
     if(Date.now() - startT > MAX_TIME) return;
     const t = e.changedTouches[0];
     const dx = t.clientX - startX, dy = t.clientY - startY;
@@ -2234,6 +2238,7 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   const countLabel = document.getElementById("noticeBoxCount");
   let slideIndex = 0;
   let slideCount = 0;
+  let justSwiped = false;
 
   function goToSlide(i){
     slideIndex = Math.max(0, Math.min(i, slideCount - 1));
@@ -2257,10 +2262,14 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
     [].forEach.call(dotsBox.children, d => d.addEventListener("click", () => goToSlide(+d.dataset.i)));
     goToSlide(0);
     modal.hidden = false;
+    noticeModalOpen = true;
+    document.body.style.overflow = "hidden";
   }
 
   function closeModal(){
     modal.hidden = true;
+    noticeModalOpen = false;
+    document.body.style.overflow = "";
     clearNewFlags();
   }
 
@@ -2286,6 +2295,8 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
       const t = e.changedTouches[0];
       const dx = t.clientX - startX, dy = t.clientY - startY;
       if(Math.abs(dx) < MIN_DIST || Math.abs(dy) > MAX_OFF_AXIS) return;
+      justSwiped = true; // stop the ghost click that follows a touch drag from closing the modal
+      setTimeout(() => { justSwiped = false; }, 300);
       if(dx < 0) goToSlide(slideIndex + 1);
       else goToSlide(slideIndex - 1);
     }, {passive:true});
@@ -2295,7 +2306,7 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   prevBtn.addEventListener("click", () => goToSlide(slideIndex - 1));
   goBtn.addEventListener("click", advance);
   closeBtn.addEventListener("click", closeModal);
-  modal.addEventListener("click", e => { if(e.target === modal) closeModal(); });
+  modal.addEventListener("click", e => { if(!justSwiped && e.target === modal) closeModal(); });
   document.addEventListener("keydown", e => {
     if(modal.hidden) return;
     if(e.key === "Escape") closeModal();
