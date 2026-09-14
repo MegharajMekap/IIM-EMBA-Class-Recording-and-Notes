@@ -760,7 +760,7 @@
 
   /* ---------- notice marquee ---------- */
   .noticebar{
-    position:relative;overflow:hidden;white-space:nowrap;
+    position:relative;overflow:hidden;white-space:nowrap;cursor:pointer;
     background:linear-gradient(90deg,rgba(184,89,10,.10),rgba(224,123,26,.14));
     backdrop-filter:blur(10px) saturate(1.4);
     -webkit-backdrop-filter:blur(10px) saturate(1.4);
@@ -968,6 +968,124 @@
     60%{transform:scale(1.2) rotate(4deg);opacity:1}
     100%{transform:scale(1) rotate(0deg);opacity:1}
   }
+
+  /* ---------- notice modal (slider of all active notices) ---------- */
+  .noticeOverlay{
+    position:fixed;inset:0;z-index:1000;
+    background:radial-gradient(ellipse at 50% 20%,rgba(184,89,10,.14),rgba(12,17,28,.72) 60%);
+    backdrop-filter:blur(8px) saturate(1.3);-webkit-backdrop-filter:blur(8px) saturate(1.3);
+    display:flex;align-items:center;justify-content:center;
+    padding:20px;
+    animation:noticeOverlayIn .25s ease;
+  }
+  .noticeOverlay[hidden]{display:none}
+  @keyframes noticeOverlayIn{from{opacity:0}to{opacity:1}}
+  .noticeBox{
+    position:relative;isolation:isolate;
+    background:
+      linear-gradient(var(--card),var(--card)) padding-box,
+      linear-gradient(150deg,#E07B1A,#B8590A 35%,#1B4B8F 120%) border-box;
+    border:1px solid transparent;
+    border-radius:22px;
+    max-width:440px;width:100%;
+    padding:30px 28px 26px;
+    box-shadow:0 30px 80px rgba(16,24,40,.5),0 4px 18px rgba(184,89,10,.18);
+    overflow:hidden;
+    animation:noticeBoxIn .4s cubic-bezier(.2,.9,.25,1.15);
+  }
+  @keyframes noticeBoxIn{
+    from{opacity:0;transform:translateY(18px) scale(.94)}
+    to{opacity:1;transform:translateY(0) scale(1)}
+  }
+  .noticeBox::before{
+    content:"";position:absolute;top:-60%;right:-30%;width:70%;height:160%;z-index:-1;
+    background:radial-gradient(closest-side,rgba(224,123,26,.16),transparent);
+    pointer-events:none;
+  }
+  .noticeClose{
+    position:absolute;top:14px;right:14px;
+    width:28px;height:28px;border-radius:50%;
+    border:none;background:var(--line-soft);color:var(--mute);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background .15s ease,color .15s ease,transform .15s ease;
+  }
+  .noticeClose:hover{background:#F3DCC7;color:#B8590A;transform:rotate(90deg)}
+  .noticeClose svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.4;stroke-linecap:round}
+  .noticeBoxHead{
+    display:flex;align-items:center;gap:12px;margin-bottom:18px;padding-right:20px;
+  }
+  .noticeBoxIcon{
+    flex:none;width:42px;height:42px;border-radius:13px;
+    background:linear-gradient(145deg,#E07B1A,#B8590A);
+    box-shadow:0 6px 16px rgba(184,89,10,.35);
+    display:flex;align-items:center;justify-content:center;
+    animation:noticeBell 2.2s ease-in-out .3s infinite;
+  }
+  @keyframes noticeBell{
+    0%,80%,100%{transform:rotate(0)}
+    82%{transform:rotate(-12deg)}
+    86%{transform:rotate(10deg)}
+    90%{transform:rotate(-7deg)}
+    94%{transform:rotate(4deg)}
+    97%{transform:rotate(0)}
+  }
+  .noticeBoxIcon svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+  .noticeBoxHead h2{
+    font-family:var(--serif);font-weight:700;
+    font-size:1.2rem;margin:0;color:var(--ink);
+    background:linear-gradient(90deg,var(--ink),#B8590A);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .noticeBoxHead span{display:block;font-size:12px;color:var(--mute);font-weight:600;margin-top:2px}
+  .noticeSlider{position:relative;overflow:hidden;min-height:70px}
+  .noticeTrack{
+    display:flex;
+    transition:transform .4s cubic-bezier(.2,.9,.25,1.05);
+  }
+  .noticeSlide{
+    flex:none;width:100%;padding:2px 2px 6px;
+  }
+  .noticeSlide p{
+    margin:0;color:var(--ink-soft);font-size:15.5px;line-height:1.65;
+    font-weight:500;
+  }
+  .noticeSlide .notice-newflag{position:relative;top:-1px}
+  .noticeNav{
+    display:flex;align-items:center;justify-content:space-between;
+    margin-top:20px;gap:12px;
+  }
+  .noticeNav[hidden]{display:none}
+  .noticeArrow{
+    width:34px;height:34px;border-radius:50%;
+    border:1px solid var(--line);background:var(--card);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--ink-soft);
+    transition:background .15s ease,border-color .15s ease,color .15s ease,transform .12s ease;
+  }
+  .noticeArrow:hover{background:linear-gradient(145deg,#E07B1A,#B8590A);border-color:transparent;color:#fff;transform:translateY(-1px)}
+  .noticeArrow:active{transform:translateY(0)}
+  .noticeArrow svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+  .noticeArrow[disabled]{opacity:.3;pointer-events:none}
+  .noticeDots{display:flex;gap:6px;align-items:center}
+  .noticeDot{
+    width:7px;height:7px;border-radius:50%;
+    background:var(--line);border:none;padding:0;cursor:pointer;
+    transition:background .2s ease,width .2s ease,transform .15s ease;
+  }
+  .noticeDot.active{background:linear-gradient(90deg,#E07B1A,#B8590A);width:20px;border-radius:4px}
+  .noticeGo{
+    position:relative;overflow:hidden;
+    background:linear-gradient(135deg,var(--navy),#2B5DA6);color:#fff;border:none;
+    border-radius:12px;padding:13px 20px;
+    font-size:14.5px;font-weight:700;letter-spacing:.01em;cursor:pointer;
+    width:100%;margin-top:18px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    box-shadow:0 8px 20px rgba(27,75,143,.32);
+    transition:transform .15s ease,box-shadow .15s ease;
+  }
+  .noticeGo svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+  .noticeGo:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(27,75,143,.42)}
+  .noticeGo:active{transform:translateY(0)}
 </style>
 </head>
 <body>
@@ -986,6 +1104,34 @@
     <button class="ackGo" id="ackGo">
       <svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
       <span id="ackGoLabel">I Acknowledge &amp; Agree</span>
+    </button>
+  </div>
+</div>
+
+<div class="noticeOverlay" id="noticeOverlay" role="dialog" aria-modal="true" aria-labelledby="noticeBoxTitle" hidden>
+  <div class="noticeBox">
+    <button class="noticeClose" id="noticeClose" aria-label="Close">
+      <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg>
+    </button>
+    <div class="noticeBoxHead">
+      <div class="noticeBoxIcon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M12 2C8 2 5 5 5 9v4l-2 3v1h18v-1l-2-3V9c0-4-3-7-7-7z"/><path d="M9.5 20a2.5 2.5 0 0 0 5 0"/></svg>
+      </div>
+      <div>
+        <h2 id="noticeBoxTitle">Announcements</h2>
+        <span id="noticeBoxCount"></span>
+      </div>
+    </div>
+    <div class="noticeSlider">
+      <div class="noticeTrack" id="noticeModalTrack"></div>
+    </div>
+    <div class="noticeNav" id="noticeNav">
+      <button class="noticeArrow" id="noticePrev" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="noticeDots" id="noticeDots"></div>
+    </div>
+    <button class="noticeGo" id="noticeGo">
+      <svg id="noticeGoIcon" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+      <span id="noticeGoLabel">Got it</span>
     </button>
   </div>
 </div>
@@ -2068,6 +2214,72 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
 
   tick();
   setInterval(tick, 60000);
+
+  function clearNewFlags(){
+    if(!track.querySelector(".notice-newflag")) return;
+    NOTICES.forEach(n => { n.isNew = false; });
+    [].forEach.call(track.querySelectorAll(".notice-newflag"), el => el.remove());
+  }
+
+  /* ── notice modal: clicking the marquee opens all notices in a slider ── */
+  const modal = document.getElementById("noticeOverlay");
+  const modalTrack = document.getElementById("noticeModalTrack");
+  const navBox = document.getElementById("noticeNav");
+  const dotsBox = document.getElementById("noticeDots");
+  const prevBtn = document.getElementById("noticePrev");
+  const goBtn = document.getElementById("noticeGo");
+  const goIcon = document.getElementById("noticeGoIcon");
+  const goLabel = document.getElementById("noticeGoLabel");
+  const closeBtn = document.getElementById("noticeClose");
+  const countLabel = document.getElementById("noticeBoxCount");
+  let slideIndex = 0;
+  let slideCount = 0;
+
+  function goToSlide(i){
+    slideIndex = Math.max(0, Math.min(i, slideCount - 1));
+    modalTrack.style.transform = "translateX(-" + (slideIndex * 100) + "%)";
+    [].forEach.call(dotsBox.children, (d, idx) => d.classList.toggle("active", idx === slideIndex));
+    prevBtn.disabled = slideIndex === 0;
+    countLabel.textContent = (slideIndex + 1) + " of " + slideCount;
+    const isLast = slideIndex === slideCount - 1;
+    goLabel.textContent = isLast ? "Got it" : "Next";
+    goIcon.innerHTML = isLast ? '<path d="M20 6L9 17l-5-5"/>' : '<path d="M9 18l6-6-6-6"/>';
+  }
+
+  function openModal(){
+    const active = activeNotices();
+    if(!active.length) return;
+    slideCount = active.length;
+    modalTrack.innerHTML = active.map(n => '<div class="noticeSlide"><p>' + esc(n.text) +
+      (n.isNew ? '<sup class="notice-newflag">New</sup>' : '') + '</p></div>').join("");
+    dotsBox.innerHTML = active.map((n, i) => '<button class="noticeDot" data-i="' + i + '" aria-label="Notice ' + (i + 1) + '"></button>').join("");
+    navBox.hidden = slideCount < 2;
+    [].forEach.call(dotsBox.children, d => d.addEventListener("click", () => goToSlide(+d.dataset.i)));
+    goToSlide(0);
+    modal.hidden = false;
+  }
+
+  function closeModal(){
+    modal.hidden = true;
+    clearNewFlags();
+  }
+
+  function advance(){
+    if(slideIndex < slideCount - 1) goToSlide(slideIndex + 1);
+    else closeModal();
+  }
+
+  bar.addEventListener("click", openModal);
+  prevBtn.addEventListener("click", () => goToSlide(slideIndex - 1));
+  goBtn.addEventListener("click", advance);
+  closeBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", e => { if(e.target === modal) closeModal(); });
+  document.addEventListener("keydown", e => {
+    if(modal.hidden) return;
+    if(e.key === "Escape") closeModal();
+    else if(e.key === "ArrowRight") advance();
+    else if(e.key === "ArrowLeft") goToSlide(slideIndex - 1);
+  });
 })();
 
 /* ── live class banner — shows the session currently in its time window, with a direct Zoom link ── */
