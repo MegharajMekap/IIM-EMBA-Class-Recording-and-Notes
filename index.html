@@ -2239,6 +2239,7 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   let slideIndex = 0;
   let slideCount = 0;
   let justSwiped = false;
+  let lockScrollY = 0;
 
   function goToSlide(i){
     slideIndex = Math.max(0, Math.min(i, slideCount - 1));
@@ -2263,13 +2264,23 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
     goToSlide(0);
     modal.hidden = false;
     noticeModalOpen = true;
+    lockScrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = "-" + lockScrollY + "px";
+    document.body.style.left = "0";
+    document.body.style.right = "0";
     document.body.style.overflow = "hidden";
   }
 
   function closeModal(){
     modal.hidden = true;
     noticeModalOpen = false;
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.left = "";
+    document.body.style.right = "";
     document.body.style.overflow = "";
+    window.scrollTo(0, lockScrollY);
     clearNewFlags();
   }
 
