@@ -760,9 +760,22 @@
 
   /* ---------- notice marquee ---------- */
   .noticebar{
-    overflow:hidden;white-space:nowrap;
-    background:linear-gradient(90deg,#B8590A,#E07B1A);
-    color:#fff;padding:9px 0;
+    position:relative;overflow:hidden;white-space:nowrap;
+    background:linear-gradient(90deg,rgba(184,89,10,.10),rgba(224,123,26,.14));
+    backdrop-filter:blur(10px) saturate(1.4);
+    -webkit-backdrop-filter:blur(10px) saturate(1.4);
+    border-top:1px solid rgba(184,89,10,.16);
+    border-bottom:1px solid rgba(184,89,10,.16);
+    color:#8A420A;padding:9px 0;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 40px),transparent);
+    mask-image:linear-gradient(90deg,transparent,#000 40px,#000 calc(100% - 40px),transparent);
+  }
+  .noticebar::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(120deg,transparent 0%,rgba(255,255,255,.35) 45%,transparent 60%);
+    background-size:220% 100%;
+    animation:noticeShine 6s ease-in-out infinite;
+    mix-blend-mode:soft-light;
   }
   .noticebar[hidden]{display:none}
   .notice-track{
@@ -782,6 +795,10 @@
   @keyframes noticeScroll{
     from{transform:translateX(-50%)}
     to{transform:translateX(0)}
+  }
+  @keyframes noticeShine{
+    0%,100%{background-position:220% 0}
+    50%{background-position:-20% 0}
   }
 
   /* ---------- live class banner ---------- */
@@ -1754,7 +1771,7 @@ function renderCalendar(){
 
 /* ── tabs ── */
 const PANELS = ["recordings", "notes", "calendar"];
-function setTab(name){
+function setTab(name, userAction){
   if(PANELS.indexOf(name) === -1) name = "recordings";
   PANELS.forEach(p => {
     document.getElementById("panel-" + p).hidden = p !== name;
@@ -1765,9 +1782,13 @@ function setTab(name){
   if(location.hash !== hash) history.replaceState(null, "", location.pathname + location.search + hash);
   if(name === "calendar") renderCalendar();
   moveTabIndicator();
+  if(userAction){
+    const flag = document.querySelector(".tab .newflag");
+    if(flag) flag.remove();
+  }
 }
 PANELS.forEach(p => {
-  document.getElementById("tabBtn-" + p).addEventListener("click", () => setTab(p));
+  document.getElementById("tabBtn-" + p).addEventListener("click", () => setTab(p, true));
 });
 
 /* sliding highlight behind the active tab */
@@ -1796,7 +1817,7 @@ document.addEventListener("keydown", e => {
   const i = current ? PANELS.indexOf(current.id.replace("tabBtn-", "")) : -1;
   if(i === -1) return;
   const next = i + (e.key === "ArrowRight" ? 1 : -1);
-  if(next >= 0 && next < PANELS.length) setTab(PANELS[next]);
+  if(next >= 0 && next < PANELS.length) setTab(PANELS[next], true);
 });
 
 /* swipe left/right anywhere on the page to switch tabs, touch devices only */
@@ -1831,7 +1852,7 @@ document.addEventListener("keydown", e => {
     const current = document.querySelector('.tab[aria-selected="true"]');
     const i = current ? PANELS.indexOf(current.id.replace("tabBtn-", "")) : -1;
     const next = i + (dx < 0 ? 1 : -1);
-    if(i !== -1 && next >= 0 && next < PANELS.length) setTab(PANELS[next]);
+    if(i !== -1 && next >= 0 && next < PANELS.length) setTab(PANELS[next], true);
   }, {passive:true});
 })();
 
@@ -2969,13 +2990,6 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   if("serviceWorker" in navigator){
     navigator.serviceWorker.register("sw.js").catch(function(){});
   }
-})();
-
-/* ── recordings tab "New" badge: flash for 30s, then remove ── */
-(function(){
-  const flag = document.querySelector(".tab .newflag");
-  if(!flag) return;
-  setTimeout(function(){ flag.remove(); }, 30000);
 })();
 
 /* ── manual refresh button (shown in every view — browser tab or installed PWA) ── */
