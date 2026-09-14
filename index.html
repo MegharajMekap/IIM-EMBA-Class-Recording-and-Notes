@@ -1122,7 +1122,7 @@
         <span id="noticeBoxCount"></span>
       </div>
     </div>
-    <div class="noticeSlider">
+    <div class="noticeSlider" id="noticeSlider">
       <div class="noticeTrack" id="noticeModalTrack"></div>
     </div>
     <div class="noticeNav" id="noticeNav">
@@ -2223,6 +2223,7 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
 
   /* ── notice modal: clicking the marquee opens all notices in a slider ── */
   const modal = document.getElementById("noticeOverlay");
+  const sliderEl = document.getElementById("noticeSlider");
   const modalTrack = document.getElementById("noticeModalTrack");
   const navBox = document.getElementById("noticeNav");
   const dotsBox = document.getElementById("noticeDots");
@@ -2268,6 +2269,28 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
     if(slideIndex < slideCount - 1) goToSlide(slideIndex + 1);
     else closeModal();
   }
+
+  /* swipe left/right on the slider to move between notices, touch devices only */
+  (function(){
+    const MIN_DIST = 40, MAX_TIME = 600, MAX_OFF_AXIS = 60; // px, ms, px
+    let startX = 0, startY = 0, startT = 0, tracking = false;
+    sliderEl.addEventListener("touchstart", e => {
+      tracking = true;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      startT = Date.now();
+    }, {passive:true});
+    sliderEl.addEventListener("touchend", e => {
+      if(!tracking) return;
+      tracking = false;
+      if(Date.now() - startT > MAX_TIME) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - startX, dy = t.clientY - startY;
+      if(Math.abs(dx) < MIN_DIST || Math.abs(dy) > MAX_OFF_AXIS) return;
+      if(dx < 0) goToSlide(slideIndex + 1);
+      else goToSlide(slideIndex - 1);
+    }, {passive:true});
+  })();
 
   bar.addEventListener("click", openModal);
   prevBtn.addEventListener("click", () => goToSlide(slideIndex - 1));
