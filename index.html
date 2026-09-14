@@ -1749,6 +1749,42 @@ PANELS.forEach(p => {
   document.getElementById("tabBtn-" + p).addEventListener("click", () => setTab(p));
 });
 
+/* swipe left/right anywhere on the page to switch tabs, touch devices only */
+(function(){
+  const MIN_DIST = 60, MAX_TIME = 600, MAX_OFF_AXIS = 60; // px, px, ms
+  let startX = 0, startY = 0, startT = 0, tracking = false;
+
+  // don't hijack swipes meant to scroll something horizontally, e.g. the calendar table
+  function scrollsHorizontally(el){
+    while(el && el !== document.body){
+      if(el.scrollWidth > el.clientWidth + 1) return true;
+      el = el.parentElement;
+    }
+    return false;
+  }
+
+  document.addEventListener("touchstart", e => {
+    tracking = e.touches.length === 1 && !scrollsHorizontally(e.target);
+    if(!tracking) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    startT = Date.now();
+  }, {passive:true});
+
+  document.addEventListener("touchend", e => {
+    if(!tracking) return;
+    tracking = false;
+    if(Date.now() - startT > MAX_TIME) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - startX, dy = t.clientY - startY;
+    if(Math.abs(dx) < MIN_DIST || Math.abs(dy) > MAX_OFF_AXIS) return;
+    const current = document.querySelector('.tab[aria-selected="true"]');
+    const i = current ? PANELS.indexOf(current.id.replace("tabBtn-", "")) : -1;
+    const next = i + (dx < 0 ? 1 : -1);
+    if(i !== -1 && next >= 0 && next < PANELS.length) setTab(PANELS[next]);
+  }, {passive:true});
+})();
+
 /* lift the floating tab bar with a shadow once it has stuck to the top */
 (function(){
   const tabs = document.querySelector(".tabs");
