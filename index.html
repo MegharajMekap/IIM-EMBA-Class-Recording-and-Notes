@@ -231,6 +231,21 @@
   }
   .tally{font-size:14px;color:var(--mute)}
 
+  /* ---------- tab-themed zone (tab bar downward, tinted per active tab) ---------- */
+  .tabThemeZone{
+    background:var(--zone-bg,transparent);
+    border-radius:26px;
+    padding:14px 16px 26px;
+    margin:0 -16px;
+    transition:background-color .5s ease;
+  }
+  body[data-activetab="recordings"]{--zone-bg:#FFF7EF}
+  body[data-activetab="notes"]{--zone-bg:#EEFBF7}
+  body[data-activetab="calendar"]{--zone-bg:#F8F1FD}
+  @media (max-width:520px){
+    .tabThemeZone{padding:10px 10px 20px;margin:0 -10px;border-radius:20px}
+  }
+
   /* ---------- tabs ---------- */
   .tabs{
     display:flex;gap:6px;
@@ -1132,7 +1147,7 @@
   .noticeGo:active{transform:translateY(0)}
 </style>
 </head>
-<body>
+<body data-activetab="recordings">
 
 <div class="ackOverlay" id="ackOverlay" role="dialog" aria-modal="true" aria-labelledby="ackTitle">
   <div class="ackBox">
@@ -1245,6 +1260,7 @@
     <p class="quoteline" id="quoteLine" hidden><span id="quoteText"></span><span id="quoteCaret" class="typecaret done"></span></p>
   </header>
 
+  <div class="tabThemeZone" id="tabThemeZone">
   <nav class="tabs" role="tablist">
     <span class="tabIndicator" id="tabIndicator" aria-hidden="true"></span>
     <button class="tab" role="tab" id="tabBtn-recordings" aria-selected="true">
@@ -1304,6 +1320,7 @@
       <a class="cmail" href="#">loading…</a>
     </span>
   </footer>
+  </div>
 </div>
 
 <script>
@@ -1984,6 +2001,7 @@ function setTab(name, userAction){
     document.getElementById("panel-" + p).hidden = p !== name;
     document.getElementById("tabBtn-" + p).setAttribute("aria-selected", p === name);
   });
+  document.body.setAttribute("data-activetab", name);
   tally.style.display = name === "recordings" ? "" : "none";
   const hash = name === "recordings" ? "" : "#" + name;
   if(location.hash !== hash) history.replaceState(null, "", location.pathname + location.search + hash);
