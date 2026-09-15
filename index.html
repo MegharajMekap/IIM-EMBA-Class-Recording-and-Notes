@@ -498,6 +498,12 @@
   .open:hover{background:var(--navy-deep);transform:translateY(-1px);box-shadow:0 6px 14px -4px rgba(18,53,104,.45)}
   .open svg{width:12px;height:12px;fill:currentColor}
   .featured .open{padding:12px 22px;font-size:15px}
+  .open-fresh{animation:openFreshGlow 1.6s ease-out 2}
+  @keyframes openFreshGlow{
+    0%{box-shadow:0 0 0 0 rgba(27,75,143,.5)}
+    70%{box-shadow:0 0 0 9px rgba(27,75,143,0)}
+    100%{box-shadow:0 0 0 0 rgba(27,75,143,0)}
+  }
 
   .pass{
     background:var(--card);
@@ -505,10 +511,15 @@
     border-radius:7px;padding:8px 13px;
     font-size:13.5px;color:var(--ink-soft);
     cursor:pointer;font-variant-numeric:tabular-nums;
-    transition:border-color .18s ease,background .18s ease;
+    transition:border-color .18s ease,background .18s ease,transform .18s ease;
   }
   .pass:hover{border-color:#C6D0E0}
-  .pass.done{color:var(--navy);border-color:var(--navy);background:var(--navy-tint)}
+  .pass.done{color:var(--navy);border-color:var(--navy);background:var(--navy-tint);animation:passBounce .35s ease}
+  @keyframes passBounce{
+    0%{transform:scale(1)}
+    40%{transform:scale(1.08)}
+    100%{transform:scale(1)}
+  }
 
   .waiting{
     display:inline-flex;align-items:center;gap:7px;
@@ -608,13 +619,17 @@
   .calDow:nth-child(7n+1),.calDow:nth-child(7n){color:#9B3F52}
   .calCell{
     background:var(--card);min-height:96px;padding:7px 6px;display:flex;flex-direction:column;gap:4px;
-    transition:background-color .15s ease;
+    transition:background-color .15s ease,transform .15s ease,box-shadow .15s ease;
+    animation:calCellIn .3s ease backwards;
+    position:relative;
   }
+  @keyframes calCellIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
   .calCell:nth-child(7n+1),.calCell:nth-child(7n){background:#FBF8F7}
-  .calCell:hover{background:var(--navy-tint)}
+  .calCell:hover{background:var(--navy-tint);transform:translateY(-2px);box-shadow:0 6px 14px -6px rgba(22,35,58,.25);z-index:1}
   .calCell-blank{background:var(--page)}
   .calCell-blank:hover{background:var(--page)}
   .calCell:has(.calToday){background:var(--navy-tint);box-shadow:inset 0 0 0 1.5px var(--navy)}
+  .calCell:has(.calToday):hover{box-shadow:inset 0 0 0 1.5px var(--navy),0 6px 14px -6px rgba(22,35,58,.25)}
   .calDayNum{font-size:11.5px;font-weight:700;color:var(--ink-soft)}
   .calToday{
     display:inline-flex;align-items:center;justify-content:center;
@@ -626,8 +641,9 @@
     text-align:center;white-space:normal;line-height:1.15;
     font-size:1.05rem;font-weight:800;letter-spacing:.01em;
     color:var(--navy);
-    animation:newFlash 1.2s ease-in-out infinite;
+    animation:calTodayFlagIn .3s cubic-bezier(.2,.9,.25,1.4),newFlash 1.2s ease-in-out .3s infinite;
   }
+  @keyframes calTodayFlagIn{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
   .calChips{display:flex;flex-direction:column;gap:3px;overflow:hidden}
   .calChip{
     display:flex;align-items:center;gap:4px;border-radius:6px;
@@ -1589,7 +1605,9 @@ function actions(r){
     return '<span class="waiting">' + (expired ? "Video expired" : "Link coming soon") + '</span>';
   }
   const ytId = youTubeId(r.url);
-  let h = '<a class="open" href="' + esc(r.url) + '" target="_blank" rel="noopener"' +
+  const now0 = new Date(); now0.setHours(0,0,0,0);
+  const isFresh = (now0 - d0(r.date)) / 86400000 <= 1;
+  let h = '<a class="open' + (isFresh ? " open-fresh" : "") + '" href="' + esc(r.url) + '" target="_blank" rel="noopener"' +
           (ytId ? ' data-yt="' + esc(ytId) + '"' : "") + '>' +
           '<svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8z"/></svg>Open recording</a>';
   if(r.passcode) h += '<button class="pass" data-pass="' + esc(r.passcode) + '">Passcode ' + esc(r.passcode) + '</button>';
@@ -1847,7 +1865,7 @@ function calMonthGrid(year, month, items, todayFlag, pastItems){
     const isToday = new Date(year, month, day).getTime() === today.getTime();
     const dayItems = (byDay.get(day) || []).slice().sort((a,b) => stamp(a) - stamp(b));
     const doneItems = dayItems.length ? [] : (byDayPast.get(day) || []).slice().sort((a,b) => stamp(a) - stamp(b));
-    cells += '<div class="calCell">' +
+    cells += '<div class="calCell" style="animation-delay:' + Math.min(day * 10, 220) + 'ms">' +
       '<span class="calDayNum' + (isToday ? ' calToday' : '') + '">' + day + '</span>' +
       (isToday && todayFlag ? '<span class="calTodayFlag">' + todayFlag + '</span>' : '') +
       '<div class="calChips">' + dayItems.map(calChip).join("") + doneItems.map(calChipDone).join("") + '</div>' +
@@ -2252,7 +2270,6 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   const countLabel = document.getElementById("noticeBoxCount");
   let slideIndex = 0;
   let slideCount = 0;
-  let justSwiped = false;
   let lockScrollY = 0;
 
   function goToSlide(i){
@@ -2326,8 +2343,6 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
       const t = e.changedTouches[0];
       const dx = t.clientX - startX, dy = t.clientY - startY;
       if(Math.abs(dx) < MIN_DIST || Math.abs(dy) > MAX_OFF_AXIS) return;
-      justSwiped = true; // stop the ghost click that follows a touch drag from closing the modal
-      setTimeout(() => { justSwiped = false; }, 300);
       if(dx < 0){
         if(slideIndex === slideCount - 1) shakeGoBtn();
         else goToSlide(slideIndex + 1);
@@ -2405,24 +2420,6 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   // official/panchang calendars and may shift by a day for moon-sighted
   // Islamic festivals once officially confirmed.
   const FESTIVALS = {
-    "2026-01-01": "Happy New Year! 🎉",
-    "2026-01-14": "Happy Makar Sankranti & Pongal! 🌾",
-    "2026-01-26": "Happy Republic Day! 🇮🇳",
-    "2026-02-15": "Happy Maha Shivaratri! 🙏",
-    "2026-03-04": "Happy Holi! 🎨",
-    "2026-03-21": "Eid Mubarak! 🌙",
-    "2026-03-26": "Happy Ram Navami! 🙏",
-    "2026-03-31": "Happy Mahavir Jayanti! 🙏",
-    "2026-04-03": "Happy Good Friday",
-    "2026-04-14": "Happy Baisakhi! 🌾",
-    "2026-05-01": "Happy Buddha Purnima! ☸️",
-    "2026-05-27": "Eid Mubarak! 🌙",
-    "2026-06-26": "Muharram Observance",
-    "2026-08-15": "Happy Independence Day! 🇮🇳",
-    "2026-08-26": "Happy Onam! 🌼",
-    "2026-08-28": "Happy Raksha Bandhan! 🎗️",
-    "2026-09-04": "Happy Janmashtami! 🦚",
-    "2026-09-14": "Happy Ganesh Chaturthi! 🐘",
     "2026-10-02": "Happy Gandhi Jayanti 🙏",
     "2026-10-20": "Happy Dussehra! 🏹",
     "2026-11-08": "Happy Diwali! 🪔",
