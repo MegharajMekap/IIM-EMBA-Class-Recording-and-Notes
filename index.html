@@ -233,25 +233,24 @@
 
   /* ---------- tabs ---------- */
   .tabs{
-    display:flex;gap:4px;
-    background:rgba(238,243,250,.82);
-    -webkit-backdrop-filter:blur(10px);
-    backdrop-filter:blur(10px);
+    display:flex;gap:6px;
+    background:linear-gradient(180deg,#EFF4FB,#E3EAF6);
     border:1px solid #DCE6F4;
-    border-radius:12px;
-    padding:5px;
+    border-radius:20px;
+    padding:8px;
     margin-top:26px;
-    box-shadow:inset 0 1px 2px rgba(22,35,58,.04);
+    box-shadow:inset 0 1px 2px rgba(22,35,58,.05);
     position:sticky;top:12px;z-index:20;
     transition:box-shadow .18s ease;
   }
   .tabs.is-stuck{
-    box-shadow:inset 0 1px 2px rgba(22,35,58,.04),0 10px 24px rgba(22,35,58,.14);
+    box-shadow:inset 0 1px 2px rgba(22,35,58,.05),0 10px 24px rgba(22,35,58,.14);
   }
   .tabIndicator{
     position:absolute;top:5px;bottom:5px;left:5px;width:0;
-    background:var(--navy);border-radius:8px;
-    box-shadow:0 2px 7px rgba(18,53,104,.32);
+    background:linear-gradient(160deg,#2A5CA6 0%,var(--navy-deep) 100%);
+    border-radius:15px;
+    box-shadow:0 10px 20px -6px rgba(18,53,104,.5),0 2px 6px rgba(18,53,104,.3);
     transition:left .32s cubic-bezier(.65,0,.35,1),width .32s cubic-bezier(.65,0,.35,1);
     z-index:0;pointer-events:none;
   }
@@ -261,23 +260,41 @@
   }
   .tab{
     flex:1;position:relative;z-index:1;
-    background:none;border:none;border-radius:8px;cursor:pointer;
-    padding:11px 8px;
-    font-size:14.5px;font-weight:600;color:var(--mute);
-    display:inline-flex;align-items:center;justify-content:center;
+    background:none;border:none;border-radius:15px;cursor:pointer;
+    padding:10px 6px 11px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+    font-size:13px;font-weight:600;color:var(--mute);
     transition:color .18s ease;
   }
-  .tab:hover{color:var(--ink-soft);background:rgba(255,255,255,.6)}
+  .tab:hover:not([aria-selected="true"]){color:var(--ink-soft);background:rgba(255,255,255,.6)}
   .tab[aria-selected="true"]{color:#fff}
   .tab[aria-selected="true"]:hover{background:none}
+  .tabMetaRow{display:inline-flex;align-items:center;gap:5px;line-height:1}
+  .tabLabel{white-space:nowrap}
   .tabcount{
     display:inline-flex;align-items:center;justify-content:center;
-    min-width:20px;height:20px;padding:0 6px;margin-left:8px;
-    border-radius:10px;background:#fff;color:var(--navy);
-    font-size:12px;font-weight:600;font-variant-numeric:tabular-nums;
+    min-width:18px;height:18px;padding:0 5px;
+    border-radius:9px;background:#fff;color:var(--navy);
+    font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;
+    box-shadow:0 1px 2px rgba(22,35,58,.15);
   }
-  .tab[aria-selected="true"] .tabcount{background:rgba(255,255,255,.24);color:#fff}
-  .tabIcon{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;margin-right:8px;flex:none}
+  .tab[aria-selected="true"] .tabcount{background:rgba(255,255,255,.26);color:#fff;box-shadow:none}
+
+  .tabIconWrap{
+    width:38px;height:38px;flex:none;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 3px 7px rgba(22,35,58,.16),inset 0 1px 0 rgba(255,255,255,.3);
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease;
+  }
+  .tabIconWrap.amber{background:linear-gradient(150deg,#FDBA74,#F97316)}
+  .tabIconWrap.teal{background:linear-gradient(150deg,#5EEAD4,#0D9488)}
+  .tabIconWrap.violet{background:linear-gradient(150deg,#D8B4FE,#9333EA)}
+  .tabIcon{width:19px;height:19px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+
+  .tab[aria-selected="true"] .tabIconWrap{
+    transform:scale(1.1) translateY(-2px);
+    box-shadow:0 6px 14px -2px rgba(18,53,104,.4),inset 0 1px 0 rgba(255,255,255,.4);
+  }
   .tab[aria-selected="true"] .iconPlay{
     transform-origin:11.3px 12px;
     animation:iconPlayPop .45s cubic-bezier(.34,1.56,.64,1) 1;
@@ -304,13 +321,13 @@
     70%{transform:scale(1.15)}
     100%{transform:scale(1);opacity:1}
   }
-  .tab:not([aria-selected="true"]):hover .tabIcon{animation:iconNudge .5s ease}
+  .tab:not([aria-selected="true"]):hover .tabIconWrap{animation:iconNudge .5s ease}
   @keyframes iconNudge{
     0%,100%{transform:translateY(0)}
-    50%{transform:translateY(-2px)}
+    50%{transform:translateY(-3px)}
   }
   @media (prefers-reduced-motion:reduce){
-    .iconPlay,.iconLines,.iconDate,.tab .tabIcon{animation:none!important}
+    .iconPlay,.iconLines,.iconDate,.tab .tabIconWrap{animation:none!important}
   }
   .tabpanel[hidden]{display:none}
   .tabpanel{animation:tabFadeIn .32s cubic-bezier(.16,1,.3,1)}
@@ -324,7 +341,7 @@
   .newflag{
     font-size:9.5px;font-weight:700;letter-spacing:.03em;
     color:#C2410C;background:rgba(194,65,12,.12);
-    border-radius:4px;padding:1px 5px;margin-left:5px;
+    border-radius:4px;padding:1px 5px;
     vertical-align:middle;
     animation:newFlash 0.9s ease-in-out 33.34;
   }
@@ -337,11 +354,10 @@
   }
   .tab[aria-selected="true"] .newflag{color:#fff;background:rgba(255,255,255,.24)}
   @media (max-width:520px){
-    .tab{font-size:13px;padding:10px 4px}
-    .tabcount{min-width:18px;height:18px;font-size:11px;margin-left:6px}
-    .tab:not([aria-selected="true"]) .tabLabel{display:none}
-    .tab:not([aria-selected="true"]) .tabIcon{margin-right:0}
-    .tab:not([aria-selected="true"]) .newflag{margin-left:4px}
+    .tab{font-size:11.5px;padding:8px 3px 9px;gap:6px}
+    .tabIconWrap{width:32px;height:32px;border-radius:10px}
+    .tabIcon{width:16px;height:16px}
+    .tabcount{min-width:16px;height:16px;font-size:10px}
   }
 
   /* ---------- featured ---------- */
@@ -1230,9 +1246,18 @@
 
   <nav class="tabs" role="tablist">
     <span class="tabIndicator" id="tabIndicator" aria-hidden="true"></span>
-    <button class="tab" role="tab" id="tabBtn-recordings" aria-selected="true"><svg class="tabIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path class="iconPlay" d="M10.2 8.3l6 3.7-6 3.7z" fill="currentColor" stroke="none"/></svg><span class="tabLabel">Recordings</span><sup class="newflag">New</sup><span class="tabcount" id="cnt-recordings"></span></button>
-    <button class="tab" role="tab" id="tabBtn-notes" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path class="iconLines" d="M9 12.5h6M9 16.5h4"/></svg><span class="tabLabel">Notes</span><span class="tabcount" id="cnt-notes"></span></button>
-    <button class="tab" role="tab" id="tabBtn-calendar" aria-selected="false"><svg class="tabIcon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18"/><rect x="7" y="2.3" width="2" height="4.2" rx="1" fill="currentColor" stroke="none"/><rect x="15" y="2.3" width="2" height="4.2" rx="1" fill="currentColor" stroke="none"/><rect class="iconDate" x="7.3" y="13" width="3.4" height="3.4" rx="0.8" fill="currentColor" stroke="none"/></svg><span class="tabLabel">Calendar</span><span class="tabcount" id="cnt-calendar"></span></button>
+    <button class="tab" role="tab" id="tabBtn-recordings" aria-selected="true">
+      <span class="tabIconWrap amber"><svg class="tabIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path class="iconPlay" d="M10.2 8.3l6 3.7-6 3.7z" fill="#fff" stroke="none"/></svg></span>
+      <span class="tabMetaRow"><span class="tabLabel">Recordings</span><sup class="newflag">New</sup><span class="tabcount" id="cnt-recordings"></span></span>
+    </button>
+    <button class="tab" role="tab" id="tabBtn-notes" aria-selected="false">
+      <span class="tabIconWrap teal"><svg class="tabIcon" viewBox="0 0 24 24"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M14 3v5h5"/><path class="iconLines" d="M9 12.5h6M9 16.5h4"/></svg></span>
+      <span class="tabMetaRow"><span class="tabLabel">Notes</span><span class="tabcount" id="cnt-notes"></span></span>
+    </button>
+    <button class="tab" role="tab" id="tabBtn-calendar" aria-selected="false">
+      <span class="tabIconWrap violet"><svg class="tabIcon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="3"/><path d="M3 10h18"/><rect x="7" y="2.3" width="2" height="4.2" rx="1" fill="#fff" stroke="none"/><rect x="15" y="2.3" width="2" height="4.2" rx="1" fill="#fff" stroke="none"/><rect class="iconDate" x="7.3" y="13" width="3.4" height="3.4" rx="0.8" fill="#fff" stroke="none"/></svg></span>
+      <span class="tabMetaRow"><span class="tabLabel">Calendar</span><span class="tabcount" id="cnt-calendar"></span></span>
+    </button>
   </nav>
 
   <div class="masthead-foot">
