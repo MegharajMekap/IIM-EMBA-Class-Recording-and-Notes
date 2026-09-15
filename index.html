@@ -275,7 +275,7 @@
     .tabIndicator{transition:none}
   }
   .tab{
-    flex:1;position:relative;z-index:1;
+    flex:1;position:relative;z-index:1;min-width:0;overflow:hidden;
     background:none;border:none;border-radius:15px;cursor:pointer;
     padding:10px 6px 11px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
@@ -285,8 +285,8 @@
   .tab:hover:not([aria-selected="true"]){color:var(--ink-soft);background:rgba(255,255,255,.6)}
   .tab[aria-selected="true"]{color:var(--navy-deep)}
   .tab[aria-selected="true"]:hover{background:none}
-  .tabMetaRow{display:inline-flex;align-items:center;gap:5px;line-height:1}
-  .tabLabel{white-space:nowrap}
+  .tabMetaRow{display:inline-flex;align-items:center;gap:5px;line-height:1;max-width:100%}
+  .tabLabel{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
   .tabcount{
     display:inline-flex;align-items:center;justify-content:center;
     min-width:18px;height:18px;padding:0 5px;
