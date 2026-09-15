@@ -1088,6 +1088,14 @@
   }
   .noticeGo svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
   .noticeGo:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(27,75,143,.42)}
+  .noticeGo.shake{animation:noticeGoShake .4s ease}
+  @keyframes noticeGoShake{
+    0%,100%{transform:translateX(0)}
+    20%{transform:translateX(-6px)}
+    40%{transform:translateX(5px)}
+    60%{transform:translateX(-4px)}
+    80%{transform:translateX(3px)}
+  }
   .noticeGo:active{transform:translateY(0)}
 </style>
 </head>
@@ -1354,6 +1362,8 @@ const RECORDINGS = [
     lecture:"Session 4", duration:"2h 30m", term:"Term 1 Phase 2", url:"", passcode:"" },
   { date:"2026-09-15", time:"10:00 PM", ends:"11:00 PM", subject:"Organizational Behaviour",
     lecture:"Quiz 1", duration:"1h", term:"Term 1 Phase 2", url:"", passcode:"" },
+  { date:"2026-09-19", time:"12:30 PM", ends:"1:00 PM", subject:"Financial Reporting and Analysis",
+    lecture:"Quiz 1", duration:"30m", term:"Term 1 Phase 2", url:"", passcode:"" },
   { date:"2026-09-19", time:"1:00 PM", ends:"3:45 PM", brk:"2:15 PM – 2:30 PM", subject:"Financial Reporting and Analysis", faculty:"Prof. Ashish Kumar",
     lecture:"Session 5", duration:"2h 30m", term:"Term 1 Phase 2", url:"https://iimkashipur-ac-in.zoom.us/j/82483309810?pwd=4aXpGP8JlVRufDDli4oHJ1hAooV29l.1", passcode:"" },
   { date:"2026-09-19", time:"4:00 PM", ends:"6:45 PM", brk:"5:15 PM – 5:30 PM", subject:"Executive Communications", faculty:"Prof. Smarak Samarjeet",
@@ -2293,6 +2303,12 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
     else closeModal();
   }
 
+  function shakeGoBtn(){
+    goBtn.classList.remove("shake");
+    void goBtn.offsetWidth; // restart animation
+    goBtn.classList.add("shake");
+  }
+
   /* swipe left/right anywhere on the modal to move between notices, touch devices only */
   (function(){
     const MIN_DIST = 40, MAX_TIME = 600, MAX_OFF_AXIS = 60; // px, ms, px
@@ -2312,8 +2328,10 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
       if(Math.abs(dx) < MIN_DIST || Math.abs(dy) > MAX_OFF_AXIS) return;
       justSwiped = true; // stop the ghost click that follows a touch drag from closing the modal
       setTimeout(() => { justSwiped = false; }, 300);
-      if(dx < 0) goToSlide(slideIndex + 1);
-      else goToSlide(slideIndex - 1);
+      if(dx < 0){
+        if(slideIndex === slideCount - 1) shakeGoBtn();
+        else goToSlide(slideIndex + 1);
+      } else goToSlide(slideIndex - 1);
     }, {passive:true});
   })();
 
@@ -2321,7 +2339,6 @@ setTab(location.hash === "#notes" || location.hash === "#calendar" ? location.ha
   prevBtn.addEventListener("click", () => goToSlide(slideIndex - 1));
   goBtn.addEventListener("click", advance);
   closeBtn.addEventListener("click", closeModal);
-  modal.addEventListener("click", e => { if(!justSwiped && e.target === modal) closeModal(); });
   document.addEventListener("keydown", e => {
     if(modal.hidden) return;
     if(e.key === "Escape") closeModal();
