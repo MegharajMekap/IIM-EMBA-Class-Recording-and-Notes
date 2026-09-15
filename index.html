@@ -1559,7 +1559,7 @@ function to24(t){
   if(ap === "AM" && h === 12) h = 0;
   return String(h).padStart(2,"0") + ":" + m[2];
 }
-const sorted = [...RECORDINGS].sort((a,b) => stamp(b) - stamp(a));
+const sorted = RECORDINGS.filter(r => !/^quiz\b/i.test(r.lecture)).sort((a,b) => stamp(b) - stamp(a));
 
 const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const recId = r => "rec-" + r.date + "-" + String(r.time || "").replace(/[^0-9A-Za-z]+/g,"");
