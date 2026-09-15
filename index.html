@@ -199,8 +199,8 @@
   .subjectDD-btn .swatch{width:8px;height:8px;border-radius:2px;flex:none}
   .subjectDD-btn .chev{width:14px;height:14px;flex:none;color:var(--mute);transition:transform .15s ease}
   .subjectDD-btn:hover{border-color:#C6D0E0}
-  .chips.open .subjectDD-btn{border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,75,143,.1)}
-  .chips.open .subjectDD-btn .chev{transform:rotate(180deg)}
+  .chips.dd-open .subjectDD-btn{border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,75,143,.1)}
+  .chips.dd-open .subjectDD-btn .chev{transform:rotate(180deg)}
   .subjectDD-menu{
     position:absolute;top:calc(100% + 6px);left:0;z-index:20;
     list-style:none;margin:0;
@@ -2078,7 +2078,7 @@ function buildChips(){
 }
 
 function closeSubjectDD(){
-  chipBox.classList.remove("open");
+  chipBox.classList.remove("dd-open");
   const menu = chipBox.querySelector(".subjectDD-menu");
   if(menu) menu.hidden = true;
   const btn = chipBox.querySelector(".subjectDD-btn");
@@ -2086,7 +2086,7 @@ function closeSubjectDD(){
 }
 
 document.addEventListener("keydown", e => {
-  if(e.key === "Escape" && chipBox.classList.contains("open")) closeSubjectDD();
+  if(e.key === "Escape" && chipBox.classList.contains("dd-open")) closeSubjectDD();
 });
 
 function goToRecording(id){
@@ -2132,7 +2132,7 @@ function openYouTube(e, id, httpsUrl){
 }
 
 document.addEventListener("click", e => {
-  if(chipBox.classList.contains("open") && !chipBox.contains(e.target)){
+  if(chipBox.classList.contains("dd-open") && !chipBox.contains(e.target)){
     closeSubjectDD();
   }
   const yt = e.target.closest("a.open[data-yt]");
@@ -2142,7 +2142,7 @@ document.addEventListener("click", e => {
   }
   const ddBtn = e.target.closest(".subjectDD-btn");
   if(ddBtn){
-    const nowOpen = chipBox.classList.toggle("open");
+    const nowOpen = chipBox.classList.toggle("dd-open");
     ddBtn.setAttribute("aria-expanded", nowOpen);
     const menu = chipBox.querySelector(".subjectDD-menu");
     if(menu) menu.hidden = !nowOpen;
